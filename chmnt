@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ -d "/anime/AKIRA" ]; then
+		echo "OK"
+	else mount -o uid=plex,gid=plex /anime;
+		echo "Remounted /anime"
+fi
