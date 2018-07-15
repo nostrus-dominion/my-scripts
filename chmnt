@@ -1,7 +1,13 @@
 #!/bin/sh
 
-if [ -d "/anime/AKIRA" ]; then
+if [ -f "/anime/AKIRA/Akira (1988) [1080p].mkv" ]; then
 		echo "OK"
 	else mount -o uid=plex,gid=plex /anime;
 		echo "Remounted /anime"
+fi
+
+if [ -f "/pool2/television/Star Trek/Season 01/Star Trek - S01E01 - The Man Trap.mkv" ]; then
+    echo "OK"
+    else mount -o uid=plex,gid=plex /pool2;
+        echo "Remounted /pool2"
 fi
