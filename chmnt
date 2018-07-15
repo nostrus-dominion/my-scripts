@@ -1,4 +1,5 @@
 #!/bin/sh
+#to only be used with Coruscant Host
 
 if [ -f "/anime/AKIRA/Akira (1988) [1080p].mkv" ]; then
 		echo "OK"
