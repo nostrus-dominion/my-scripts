@@ -1,5 +1,8 @@
 #!/bin/sh
+#Checks remote mounts for Plex
 #to only be used with Coruscant Host
+#Created May 15 2018
+#Modified July 15 2018
 
 if [ -f "/anime/AKIRA/Akira (1988) [1080p].mkv" ]; then
 		echo "OK"
