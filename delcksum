@@ -14,7 +14,7 @@ for file in **; do
 
   read cksm _ < <(sha1sum "$file")
   if ((arr[$cksm]++)); then 
-    rm "$file"
+    rm $file
     echo "rm $file"
   fi
 done
