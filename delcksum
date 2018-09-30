@@ -1,0 +1,18 @@
+#!/bin/bash
+#Originally created by SiegeX in superuser.com from 
+#this thread. https://superuser.com/questions/386199
+#/how-to-remove-duplicated-files-in-a-directory
+#
+#I switched it from md5sum to sha1
+
+declare -A arr
+shopt -s globstar
+
+for file in **; do
+  [[ -f "$file" ]] || continue
+
+  read cksm _ < <(sha1sum $file")
+  if ((arr[$cksm]++)); then 
+    echo "rm $file"
+  fi
+done
