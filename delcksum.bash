@@ -15,6 +15,6 @@ for file in **; do
   read cksm _ < <(sha1sum "$file")
   if ((arr[$cksm]++)); then 
     rm $file
-    echo "rm $file"
+    echo "Deleted $file"
   fi
 done
