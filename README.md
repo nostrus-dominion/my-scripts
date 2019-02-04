@@ -2,7 +2,7 @@
 
  	beep.ps1 // powershell script to have the machine beep on command
 	chmnt //bash script to check if a remote mount is still mounted
-  chmod-644.bash //bash script to change entire directory to write/read/read
+  	chmod-644.bash //bash script to change entire directory to write/read/read
 	delcksum.bash //bash script to run a checksum and delete files with same checksum in the same directory and subdirectories
 	delete.bash 	//bash script to delete all files of a specified file extension -- THESE ARE PERMANENT
 	discover-shares.ps1 //discovers all WINDOW SERVERS from ADDS and discovers their file shares using WMI
