@@ -8,14 +8,14 @@ sleep 2s
 
 echo -e "File Extension to Delete: "
 
-read -r FILE
+read -r EXT
 
-echo -e "Five second countdown to CTRL-C"
+echo -e "Five second countdown to [CTRL-C] to cancel"
 
 for i in {5..1};do echo -n "$i." && sleep 1; done
 
-echo -e "Deleting all ${FILE}"
+echo -e "Deleting all ${EXT}"
 
-find . -name "*.${FILE}" -exec rm -rf {} \;
+find . -name "*.${EXT}" -exec rm -rf {} \;
 
 echo -e "Finished!"
