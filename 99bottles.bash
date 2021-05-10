@@ -13,7 +13,7 @@ do
    sleep 1.5
    echo "${n?} ${bottles?} of beer,"
    sleep 1.5
-   echo "take one down, pass it around,"
+   echo "you take one down, you pass it around,"
    sleep 1.5
    n=n-1
    case ${n?} in
