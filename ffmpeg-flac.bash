@@ -1,3 +1,3 @@
 #/bin/sh
-for f in *.flac; do sudo ffmpeg -i "$f" -acodec libmp3lame -ab 320k "${f%.flac}.mp3"; done && sudo chown plex:plex * && sudo chmod 644 * && find . -name "*.flac" -exec rm -rf {} \;
 
+find . -name "*.flac" -exec bash -c 'for f'; do ffmpeg -i "$f" -acodec libmp3lame -b:a 320k "${f%.*}.mp3"; done' -- {} + 
