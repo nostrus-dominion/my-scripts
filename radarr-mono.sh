@@ -1,1 +1,0 @@
-/usr/bin/mono --debug /opt/Radarr/Radarr.exe -nobrowser
