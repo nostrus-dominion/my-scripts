@@ -1,43 +1,44 @@
 # my-scripts
-
- 	beep.ps1 // powershell script to have the machine beep on command
+	99bottles.bash // fun little script that sings to you
 	
-	chmnt //bash script to check if a remote mount is still mounted
+	ansi-colors.sh // shows you all the different combines on ANSI colors in your current enviornment
+ 	
+	beep.ps1 // have the machine beep on command
+	
+	check-mount.sh // checks if a remote mount is still mounted and if they are not remounts them (OBSOLETE)
   	
-	chmod-644.bash //bash script to change entire directory to write/read/read
+	checksum-delete.bash // checks all files within a directory via SHA1 checksum and deletes any duplicates, great for research
 	
-	delcksum.bash //bash script to run a checksum and delete files with same checksum in the same directory and subdirectories
+	chmod-644.bash // changes entire directory to write/read/read only
 	
-	delete.bash 	//bash script to delete all files of a specified file extension -- THESE ARE PERMANENT
+	delete.bash // deletes all files of a specified file extension -- THIS IS PERMANENT
 	
 	discover-shares.ps1 //discovers all WINDOW SERVERS from ADDS and discovers their file shares using WMI
 	
-	ffmpeg-flac.bash //automatically turns all FLAC files to 320Kbps MP3s within a directory
+	ffmerge.bash // designed to merge files of the same codec and extension into one file using ffmpeg and concat
 	
-	ffmpeg-m4a.bash //automatically turns all M4A files to 320Kbps MP3s within a directory
+	ffmpeg-flac.sh //automatically turns all flac files to 320Kbps MP3s within a directory
 	
-	ffmpeg-mp4.bash //remuxs all MP4 files into MKV files no codec changes
+	ffmpeg-m4a.sh //automatically turns all M4A files to 320Kbps MP3s within a directory
+	
+	ffmpeg-mp4-to-mkv.bash //remuxs all MP4 files into MKV files no codec changes
 	
 	neofetch //neofetch with custom options
 	
 	pillager.sh //shell script for wget that scrapes entire OD
 	
-	plex-python.py //tautulli config file
+	rar-args.sh // finds all rar files with a directory and extracts them
 	
-	radarr-mono.sh //shell script to run radarr via mono -- this is redundant
+	rar.sh // used with Deluge extract plugin to auto extract any file within given directory
 	
-	rar.sh //shell script to auto extract any file within a directory -- for use with torrent clients
+	rsync-args.sh // just something to help me remeber my most used rsync arugments (OBSOLETE)
 	
-	rsync-args.sh //shell script to automatically backup files to remote directory
+	up // shell script to auto update/upgrade debian based systems running APT
 	
-	up //shell script to auto update/upgrade debian based systems running APT
+	website-size // reads filesizes for entire OD to find total size before mirroring or scraping
 	
-	website-size //bash script read filesize for entire OD to find total size before mirroring
+	wget-args.sh // reminds me of my most used wget arugments
 	
-	wget-args.sh //shell script to run wget with custom options
+	wget-rename.sh // shitty bash script to download and rename individual files with wget
 	
-	wget-rename.sh //shitty bash script to download and rename individual files with wget
-	
-	ydl-rename.sh //bash script to run youtube-dl and rename all files via channel and title
-	
-	youtube-playlist.sh //shell script to run youtube-dl and convert files to audio only
+	youtube-playlist.sh // shell script to run youtube-dl and convert files to MP3 audio only
