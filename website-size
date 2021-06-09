@@ -1,5 +1,6 @@
 #!/bin/bash
 # Info: https://github.com/mariomaric/website-size#readme
+# Reads filesizes for an entire OD and finds the total size before mirroring
 
 # Prepare wget logfile
 log="~/wget-website-size-log.txt"
