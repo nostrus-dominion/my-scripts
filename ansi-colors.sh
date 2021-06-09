@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Display available ANSI (terminal) colour combinations
+# Display available ANSI (terminal) colour combinations for your current enviornment.
 
 # License: LGPLv2
 # Author:
