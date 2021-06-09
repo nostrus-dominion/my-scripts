@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Designed to delete files of a specified extension permanetely.
+
 echo -e "WARNING!! THESE DELETIONS ARE PERMANENT!!"
 
 echo -e "DO NOT USE THIS UNLESS YOU'RE 100% SURE!!"
