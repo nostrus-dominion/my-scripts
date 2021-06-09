@@ -1,5 +1,6 @@
 #!/bin/bash
-# Bourne Again shell version of 99 Bottles
+# Bourne Again shell version of 99 Bottles that
+# sings to you. It's just a stupid thing to do.
 # Dave Plonka - plonka@carroll1.cc.edu
 # Edited by Paul Musselman so it goes VERY slow
 
