@@ -1,3 +1,7 @@
+# Stupid powershell script that will have the machine beep on command.
+# I honestly have no idea why I made this.
+# Created by Paul Musselman
+
 [Console]::Beep(130, 100)
 [Console]::Beep(262, 100)
 [Console]::Beep(330, 100)
