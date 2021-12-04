@@ -28,6 +28,16 @@ echo -e "Five second countdown to [CTRL-C] to cancel"
 
 for i in {5..1};do echo -n "$i." && sleep 1; done
 
+echo -e "Removing unsupported filename types..."
+
+for f in ./*; do mv "$f" "$(echo "$f" | tr -d "'")"; done
+
+echo -e "Removing unsupported filename types DONE!"
+
+sleep 1s
+
+echo -e "Combining all files into one..."
+
 for f in ./*.$EXT; do echo "file '$f'" >> list.txt; done
 
 ffmpeg -f concat -safe 0 -i list.txt -c copy "$OUT.$EXT"
