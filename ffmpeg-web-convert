@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo -e "This script will convert ALL files in this"
+echo -e "directory into a web playable x264 *.mp4 file"
+echo -e "with no consideration for which file is it"
+echo -e " "
+echo -e "YOU BETTER BE FUCKING SURE YOU'RE RIGHT ABOUT THIS"
+
+echo -e "Fifteen second countdown to cancel [CTRL-C]"
+
+for i in {15..1};do echo -n "$i." && sleep 1; done
+
+for f in *.*; do ffmpeg -i "$f" -vcodec libx264 -vcodec aac "${f%.*}.mp4"; done
