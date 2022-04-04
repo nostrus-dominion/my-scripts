@@ -4,4 +4,4 @@
 #into all subdirectories. I actually have no idea
 #why I made this stupid waste of compute power.
 
-find . type -f | perl -ne 'print $1 if m/\.([^.\/]+)$/' | sort -u
+find . -type f | grep -i -E -o "\.\w*$" | sort | uniq -c
