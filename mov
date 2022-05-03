@@ -1,0 +1,1 @@
+for f in *.mov ; do ffmpeg -i "$f" -vcodec libx264 -acodec aac "${f%.mov}.mp4" ; done
