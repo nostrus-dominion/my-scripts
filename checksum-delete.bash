@@ -11,8 +11,8 @@ shopt -s globstar
 
 for file in **; do
   [[ -f "$file" ]] || continue
-
-  read cksm _ < <(sha1sum "$file")
+  
+  read cksm _ < <(sha256sum "$file")
   if ((arr[$cksm]++)); then 
     rm $file
     echo "Deleted $file"
