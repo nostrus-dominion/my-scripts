@@ -1,48 +1,72 @@
 #!/bin/bash
 
-# FFMERG
-# Version 0.5
-# License: Open Source (GPL)
-# Copyright: (c) 2021
-# Dependancy: ffmpeg, bash
+#FFMERGE
+#Version 0.7
+#License: Open Source (GPL)
+#Copyright: (c) 2021
+#Dependancy: ffmpeg, ffprobe, bash
 
-# This script is designed to merge all files of the same codec and extension (ex. mp3, m4a, mp4, mkv)
-# in the working directory using FFMPEG. It is required that all the files be from the same source,
-# with the same containers, codec, dimensions (etc). Files from a different source or codec will fail
-# and cannot be merged.
+#Checking if dependancies are installed
+required_deps=("ffmpeg" "ffprobe")
 
+for required_deps in "${required_deps[@]}"; do
+  if ! which "$required_deps" > /dev/null; then
+    echo "Error: Required dependency $required_deps is missing. Please install it and make sure it's in the PATH."
+    echo "Exiting Script!"
+    exit 1
+  fi
+done
+
+#User warnings and confirmation to continue
 echo -e "WARNING! PLEASE BE SURE THAT ALL MEDIA IS OF THE SAME CODEC/CONTAINER!"
 echo -e "THIS SCRIPT WILL NOT WORK IF YOUR MEDIA IS FROM DIFFERENT SOURCES!"
 
-sleep 2s
+read -p "Do you wish to continue? (y/n) " answer
+if [[ ! "$answer" =~ ^[Yy].* ]]; then
+  echo "Exiting script"
+  exit 0
+fi
 
+#File extensions to combine and validation.
 echo -e "Please enter the file extension of your media:"
+read -r file_extensions
 
-read -r EXT
+files=$(ls *.$file_extensions 2>/dev/null | wc -l)
+if [ $files -eq 0 ]; then
+  echo "Error: No files found with extension $file_extensions"
+  exit 1
+fi
 
+#New files output name and validation
 echo -e "Please enter the name of the output:"
+read -r new_output
 
-read -r OUT
+while [ -f "$new_output.$file_extensions" ]; do
+  read -p "File already exists. Do you wish to overwrite? (y/n) " overwrite
+  if [[ "$overwrite" =~ ^[Yy].* ]]; then
+    break
+  fi
+  echo -e "Please enter a different name for the output:"
+  read -r new_output
+done
 
+#Last chance to cancel
 echo -e "Five second countdown to [CTRL-C] to cancel"
-
 for i in {5..1};do echo -n "$i." && sleep 1; done
 
+#Doing the work
 echo -e "Removing unsupported filename types..."
-
 for f in ./*; do mv "$f" "$(echo "$f" | tr -d "'")"; done
-
 echo -e "Removing unsupported filename types DONE!"
 
 sleep 1s
 
 echo -e "Combining all files into one..."
-
-for f in ./*.$EXT; do echo "file '$f'" >> list.txt; done
-
-ffmpeg -f concat -safe 0 -i list.txt -c copy "$OUT.$EXT"
-
+for f in ./*.$file_extensions; do
+  echo "file '$f'" >> list.txt
+done
+ffmpeg -f concat -safe 0 -i list.txt -c copy "$new_output.$file_extensions" &
+pid=$!
+wait $pid
 rm list.txt
-
 echo -e "DONE!"
-
