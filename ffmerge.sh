@@ -1,13 +1,13 @@
 #!/bin/bash
 
 #FFMERGE
-#Version 0.7
-#License: Open Source (GPL)
-#Copyright: (c) 2021
-#Dependancy: ffmpeg, ffprobe, bash
+#This script is designed to merge multiple files of the same format and
+#codecs into one file. This was created for non-chapterized audiobooks.
+
+#Dependancies: ffmpeg, ffprobe, bash
 
 #Checking if dependancies are installed
-required_deps=("ffmpeg" "ffprobe")
+required_deps=("ffmpeg" "ffprobe" "bash")
 
 for required_deps in "${required_deps[@]}"; do
   if ! which "$required_deps" > /dev/null; then
