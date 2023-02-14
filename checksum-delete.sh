@@ -3,7 +3,7 @@
 #this thread. https://superuser.com/questions/386199
 #/how-to-remove-duplicated-files-in-a-directory
 #
-#I switched it from md5sum to sha1 and actually made
+#I switched it from md5sum to sha256 and actually made
 #it delete files.
 
 declare -A arr
