@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #FFMERGE
-#Version 0.8.6
+#Version 0.8.7
 #License: Open Source (GPL)
 #Copyright: (c) 2021
 #Dependancy: ffmpeg, ffprobe
@@ -22,11 +22,29 @@ echo -e "THIS SCRIPT WILL NOT WORK IF YOUR MEDIA IS FROM DIFFERENT SOURCES!"
 
 sleep 2s
 
-echo -e "Please enter the file extension of your media:"
-read -r file_extensions
+# File extension input
+while true; do
+    read -rp "Please enter the file extension of your media: " file_extensions
+    if [[ -n "$file_extensions" ]]; then
+        if ls *."$file_extensions" 1> /dev/null 2>&1; then
+            break
+        else
+            echo "ERROR: No files found with that extension. Please try again."
+        fi
+    else
+        echo "ERROR: File extension cannot be blank. Please try again."
+    fi
+done
 
-echo -e "Please enter the name of the output:"
-read -r new_output
+# New name input
+while true; do
+    read -rp "Please enter the new name of your media: " new_output
+    if [[ -n "$new_output" ]]; then
+        break
+    else
+        echo "ERROR: New name cannot be blank. Please try again."
+    fi
+done
 
 # Check if all files are of the extension
 files=$(find ./*."$file_extensions" 2>/dev/null | wc -l)
@@ -71,7 +89,7 @@ fi
 if [[ -f "list.txt" ]]; then
     echo -e "The following files will be deleted:"
     cat list.txt
-    read -p "Do you wish to delete these files? (y/n): " confirm_delete
+    read -rp "Do you wish to delete these files? (y/n): " confirm_delete
     if [[ "${confirm_delete,,}" == "y" ]]; then
         echo -e "Deleting original files..."
         while IFS= read -r line; do
