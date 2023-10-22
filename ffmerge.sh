@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #FFMERGE
-#Version 0.8.5
+#Version 0.8.6
 #License: Open Source (GPL)
 #Copyright: (c) 2021
 #Dependancy: ffmpeg, ffprobe
@@ -59,6 +59,13 @@ done
 ffmpeg -f concat -safe 0 -i list.txt -c copy "$new_output.$file_extensions" &
 pid=$!
 wait $pid
+
+ffmpeg_exit_code=$? # Exit code for ffmpeg
+if [[ $ffmpeg_exit_code -ne 0 ]]; then
+    echo "CRITICAL ERROR: ffmpeg encountered a problem attempting to run. Exit code: $ffmpeg_exit_code"
+    echo "SCRIPT EXITING!!"
+    exit 1
+fi
 
 # Read list.txt and delete input files listed in the file with user confirmation
 if [[ -f "list.txt" ]]; then
