@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #FFMERGE
-#Version 0.8
+#Version 0.8.5
 #License: Open Source (GPL)
 #Copyright: (c) 2021
 #Dependancy: ffmpeg, ffprobe
@@ -29,8 +29,8 @@ echo -e "Please enter the name of the output:"
 read -r new_output
 
 # Check if all files are of the extension
-files=$(ls *.$file_extensions 2>/dev/null | wc -l)
-if [ $files -eq 0 ]; then
+files=$(find ./*."$file_extensions" 2>/dev/null | wc -l)
+if [ "$files" -eq 0 ]; then
   echo "Error: No files found with extension $file_extensions"
   exit 1
 fi
@@ -53,32 +53,35 @@ sleep 1s
 
 # Creation of concat list and running ffmpeg to merge files
 echo -e "Combining all files into one..."
-for f in ./*.$file_extensions; do
+for f in ./*."$file_extensions"; do
     echo "file '$f'" >> list.txt
 done
 ffmpeg -f concat -safe 0 -i list.txt -c copy "$new_output.$file_extensions" &
 pid=$!
 wait $pid
 
-# User confirmation for original file deletion
-read -p "Do you wish to delete all original files? (y/n): " confirm
-if [[ "${confirm,,}" == "y" ]]; then
-    if [[ -f "list.txt" ]]; then
+# Read list.txt and delete input files listed in the file with user confirmation
+if [[ -f "list.txt" ]]; then
+    echo -e "The following files will be deleted:"
+    cat list.txt
+    read -p "Do you wish to delete these files? (y/n): " confirm_delete
+    if [[ "${confirm_delete,,}" == "y" ]]; then
         echo -e "Deleting original files..."
         while IFS= read -r line; do
-            delete_file=$(echo "$line" | awk -F "'" '{print $2}' | tr -d "'")
-            if [[ -f "delete_file" ]]; then
-                rm "$delete_file"
+            file_to_delete=$(echo "$line" | awk -F "'" '{print $2}' | tr -d "'")
+            if [[ -f "$file_to_delete" ]]; then
+                rm "$file_to_delete"
             else
-                echo "Error. File not found: $delete_file"
+                echo "File not found: $file_to_delete"
             fi
         done < list.txt
+        echo -e "Original files deleted!"
+    else
+        echo -e "Files will not be deleted. Exiting."
     fi
-    rm list.txt
-    echo "Original files were deleted."
 else
-    echo "Cofirmation denied. Original files were not deleted."
+    echo -e "Error: list.txt not found. Original files were not deleted."
 fi
 
-# Script exit
+rm list.txt
 echo -e "Script complete! Exiting now! Goodbye!"
