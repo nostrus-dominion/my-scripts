@@ -1,72 +1,76 @@
 #!/bin/bash
 
 #FFMERGE
-#This script is designed to merge multiple files of the same format and
-#codecs into one file. This was created for non-chapterized audiobooks.
-
-#Dependancies: ffmpeg, ffprobe, bash
+#Version 0.8
+#License: Open Source (GPL)
+#Copyright: (c) 2021
+#Dependancy: ffmpeg, ffprobe
 
 #Checking if dependancies are installed
-required_deps=("ffmpeg" "ffprobe" "bash")
+deps=("ffmpeg" "ffprobe")
 
-for required_deps in "${required_deps[@]}"; do
-  if ! which "$required_deps" > /dev/null; then
-    echo "Error: Required dependency $required_deps is missing. Please install it and make sure it's in the PATH."
-    echo "Exiting Script!"
+for dep in "${deps[@]}"; do
+  if ! which "$dep" > /dev/null; then
+    echo "Error: $dep is not installed or not in the PATH"
     exit 1
   fi
 done
 
-#User warnings and confirmation to continue
+#User inputs
 echo -e "WARNING! PLEASE BE SURE THAT ALL MEDIA IS OF THE SAME CODEC/CONTAINER!"
 echo -e "THIS SCRIPT WILL NOT WORK IF YOUR MEDIA IS FROM DIFFERENT SOURCES!"
 
-read -p "Do you wish to continue? (y/n) " answer
-if [[ ! "$answer" =~ ^[Yy].* ]]; then
-  echo "Exiting script"
-  exit 0
-fi
+sleep 2s
 
-#File extensions to combine and validation.
 echo -e "Please enter the file extension of your media:"
 read -r file_extensions
 
+echo -e "Please enter the name of the output:"
+read -r new_output
+
+# Check if all files are of the extension
 files=$(ls *.$file_extensions 2>/dev/null | wc -l)
 if [ $files -eq 0 ]; then
   echo "Error: No files found with extension $file_extensions"
   exit 1
 fi
 
-#New files output name and validation
-echo -e "Please enter the name of the output:"
-read -r new_output
-
-while [ -f "$new_output.$file_extensions" ]; do
-  read -p "File already exists. Do you wish to overwrite? (y/n) " overwrite
-  if [[ "$overwrite" =~ ^[Yy].* ]]; then
-    break
-  fi
-  echo -e "Please enter a different name for the output:"
-  read -r new_output
-done
-
-#Last chance to cancel
+# Countdown for user confirmation to cancel
 echo -e "Five second countdown to [CTRL-C] to cancel"
 for i in {5..1};do echo -n "$i." && sleep 1; done
 
-#Doing the work
-echo -e "Removing unsupported filename types..."
-for f in ./*; do mv "$f" "$(echo "$f" | tr -d "'")"; done
+#Removes unsupported filenames
+echo -e "Checking and removing unsupported filename types..."
+for f in ./*; do
+    if [[ "$f" == *"'"* ]]; then
+        new_file=$(echo "$f" | tr -d "'")
+        mv "$f" "$new_file"
+    fi
+done
 echo -e "Removing unsupported filename types DONE!"
-
 sleep 1s
 
+# Creation of concat list and running ffmpeg to merge files
 echo -e "Combining all files into one..."
 for f in ./*.$file_extensions; do
-  echo "file '$f'" >> list.txt
+    echo "file '$f'" >> list.txt
 done
 ffmpeg -f concat -safe 0 -i list.txt -c copy "$new_output.$file_extensions" &
 pid=$!
 wait $pid
-rm list.txt
-echo -e "DONE!"
+
+# User confirmation for original file deletion
+read -p "Do you wish to delete all original files? (y/n): " confirm
+if [[ "${confirm,,}" == "y" ]]; then
+    for f in ./*.$file_extensions; do
+        if [[ "$f" != "$new_output.$file_extensions" ]]; then
+            rm "$f" list.txt
+        fi
+    done
+    echo "Original files were deleted."
+else
+    echo "Original files were not deleted."
+fi
+
+# Script exit
+echo -e "Script complete! Exiting now! Goodbye!"
