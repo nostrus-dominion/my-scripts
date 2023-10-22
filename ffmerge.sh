@@ -38,6 +38,7 @@ fi
 # Countdown for user confirmation to cancel
 echo -e "Five second countdown to [CTRL-C] to cancel"
 for i in {5..1};do echo -n "$i." && sleep 1; done
+echo ""
 
 #Removes unsupported filenames
 echo -e "Checking and removing unsupported filename types..."
@@ -62,14 +63,21 @@ wait $pid
 # User confirmation for original file deletion
 read -p "Do you wish to delete all original files? (y/n): " confirm
 if [[ "${confirm,,}" == "y" ]]; then
-    for f in ./*.$file_extensions; do
-        if [[ "$f" != "$new_output.$file_extensions" ]]; then
-            rm "$f" list.txt
-        fi
-    done
+    if [[ -f "list.txt" ]]; then
+        echo -e "Deleting original files..."
+        while IFS= read -r line; do
+            delete_file=$(echo "$line" | awk -F "'" '{print $2}' | tr -d "'")
+            if [[ -f "delete_file" ]]; then
+                rm "$delete_file"
+            else
+                echo "Error. File not found: $delete_file"
+            fi
+        done < list.txt
+    fi
+    rm list.txt
     echo "Original files were deleted."
 else
-    echo "Original files were not deleted."
+    echo "Cofirmation denied. Original files were not deleted."
 fi
 
 # Script exit
