@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #FFMERGE
-#Version 0.9.1
+#Version 1.0
 #License: Open Source (GPL)
-#Copyright: (c) 2021
+#Copyright: (c) 2023
 #Dependancy: ffmpeg, ffprobe
 
 #Checking if dependancies are installed
@@ -16,13 +16,16 @@ for dep in "${deps[@]}"; do
   fi
 done
 
-#User inputs
-echo -e "WARNING! PLEASE BE SURE THAT ALL MEDIA IS OF THE SAME CODEC/CONTAINER!"
-echo -e "THIS SCRIPT WILL NOT WORK IF YOUR MEDIA IS FROM DIFFERENT SOURCES!"
+# Script splash
+echo "********************************************"
+echo "*              FFMERGE SCRIPT              *"
+echo "*          To Simplify Your Life           *"
+echo "********************************************"
+echo ""
 
 sleep 2s
 
-# File extension input
+# File extension input with validation
 while true; do
     read -rp "Please enter the file extension of your media: " file_extensions
     if [[ -n "$file_extensions" ]]; then
@@ -68,9 +71,15 @@ function show_progress {
     local width=50
     local completed=$((percentage * width / 100))
     local remaining=$((width - completed))
-    printf "\r["
-    printf "%${completed}s" "="
-    printf "%${remaining}s" "] (%d%%)" "$percentage"
+    local progress_bar="["
+    for ((i=0; i<completed; i++)); do
+        progress_bar+="="
+    done
+    for ((i=0; i<remaining; i++)); do
+        progress_bar+=" "
+    done
+    progress_bar+="] ($percentage%)"
+    echo -ne "\r$progress_bar"
 }
 
 # Function to validate codec and container of all files using ffprobe
@@ -155,5 +164,8 @@ else
     echo -e "Error: list.txt not found. Original files were not deleted."
 fi
 
+# Delete list.txt
 rm list.txt
+
+# Script complete. Exiting.
 echo -e "Script complete! Exiting now! Goodbye!"
