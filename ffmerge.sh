@@ -1,30 +1,37 @@
 #!/bin/bash
 
 #FFMERGE
-#Version 1.0.1
+#Version 1.1
 #License: Open Source (GPL)
 #Copyright: (c) 2023
 #Dependancy: ffmpeg, ffprobe
+
+# Global Variables for ANSI color
+brown='\033[0;33m'
+red='\033[0;31m'
+reset='\033[0m'
 
 #Checking if dependancies are installed
 deps=("ffmpeg" "ffprobe")
 
 for dep in "${deps[@]}"; do
   if ! which "$dep" > /dev/null; then
-    echo "Error: $dep is not installed or not in the PATH"
+    echo "${red}CRITCAL ERROR!!: $dep is not installed or not in the PATH${reset}"
     exit 1
   fi
 done
 
 # Script splash
-echo ""
-echo "********************************************"
-echo "*              FFMERGE SCRIPT              *"
-echo "*          To Simplify Your Life           *"
-echo "********************************************"
-echo ""
-echo "This script assumes you are within the correct"
-echo "directory. If not please CTRL-C to exit."
+echo -e "${brown}"
+echo -e "                                          Welcome to FFMERGE SCRIPT                               "
+echo -e '  ______ ______ __  __ ______ _____   _____ ______        _____  _____ _____  _____ _____ _______ '
+echo -e ' |  ____|  ____|  \/  |  ____|  __ \ / ____|  ____|      / ____|/ ____|  __ \|_   _|  __ \__   __|'
+echo -e ' | |__  | |__  | \  / | |__  | |__) | |  __| |__        | (___ | |    | |__) | | | | |__) | | |   '
+echo -e ' |  __| |  __| | |\/| |  __| |  _  /| | |_ |  __|        \___ \| |    |  _  /  | | |  ___/  | |   '
+echo -e ' | |    | |    | |  | | |____| | \ \| |__| | |____       ____) | |____| | \ \ _| |_| |      | |   '
+echo -e ' |_|    |_|    |_|  |_|______|_|  \_\\_____|______|     |_____/ \_____|_|  \_\_____|_|      |_|   '
+echo "${reset}"
+echo "    This script assumes you are within the correct directory. If not please CTRL-C to exit.          "
 echo ""
 
 sleep 2s
@@ -103,16 +110,20 @@ function show_progress {
 # Function to validate codec and container of all files using ffprobe
 function validate_files {
     echo "Validating file codecs and containers..."
-    local total_files=$(find . -maxdepth 1 -type f -name "*.$file_extensions" | wc -l)
+    local total_files
+    total_files=$(find . -maxdepth 1 -type f -name "*.$file_extensions" | wc -l)
     local current_file=0
+    local file_info
+    local file_codec
+    local file_container
 
     for file in *."$file_extensions"; do
-        # Get codec and container using ffprobe
-        info=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file")
-        file_codec=$(echo "$info" | head -n 1)
+        # Get codec and container using ffprobe and store it in a variable
+        file_info=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file")
+        file_codec=$(head -n 1 <<< "$file_info")
 
-        info=$(ffprobe -v error -show_entries format=format_name -of default=noprint_wrappers=1:nokey=1 "$file")
-        file_container=$(echo "$info" | head -n 1)
+        file_info=$(ffprobe -v error -show_entries format=format_name -of default=noprint_wrappers=1:nokey=1 "$file")
+        file_container=$(head -n 1 <<< "$file_info")
 
         # Initialize codec and container if not set
         if [[ -z "$codec" ]]; then
@@ -125,12 +136,13 @@ function validate_files {
 
         # Compare codec and container with previous files
         if [[ "$file_codec" != "$codec" || "$file_container" != "$container" ]]; then
-            echo "CRITICAL ERROR!! $file has a different codec or container!"
-            echo "EXITING SCRIPT!!"
+            echo ""
+            echo -e "${red}CRITICAL ERROR!! $file has a different codec or container!"
+            echo -e "${red}EXITING SCRIPT!!${reset}"
             exit 1
         fi
 
-        # Call on show_progress functio and update progress bar
+        # Call on show_progress function and update progress bar
         ((current_file++))
         local progress=$((current_file * 100 / total_files))
         show_progress "$progress"
@@ -139,6 +151,8 @@ function validate_files {
     echo ""  # Move to the next line after the progress bar is completed
     echo "All files codecs and containers have been validated!!"
 }
+
+# ...
 
 # Call the validate_files function
 validate_files
@@ -155,8 +169,8 @@ wait $pid
 ffmpeg_exit_code=$? # Exit code for ffmpeg
 if [[ $ffmpeg_exit_code -ne 0 ]]; then
     rm list.txt
-    echo "CRITICAL ERROR!! FFMPEG has encountered a problem! Exit code: $ffmpeg_exit_code"
-    echo "SCRIPT EXITING!!"
+    echo "${red}CRITICAL ERROR!! FFMPEG has encountered a problem! Exit code: $ffmpeg_exit_code"
+    echo "${red}EXITING SCRIPT !!${reset}"
     exit 1
 fi
 
