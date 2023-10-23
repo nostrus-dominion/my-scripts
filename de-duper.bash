@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Verision 2.0
+## Verision 2.0.1
 ## V1 Created 2021-02-07
 ## License: Open Source GPL
 ## Copyright: (c) 2023
@@ -17,10 +17,10 @@ reset='\033[0m'
 deps=("parallel" "find" "md5sum")
 
 for dep in "${deps[@]}"; do
-  if ! which "$dep" > /dev/null; then
+if ! which "$dep" > /dev/null; then
     echo "${red}CRITCAL ERROR!!: $dep is not installed or not in the PATH${reset}"
     exit 1
-  fi
+fi
 done
 
 # Script splash
@@ -45,6 +45,7 @@ validate_directory() {
 
 # Function to confirm user wants to proceed after file count
 confirm_proceed() {
+    echo -e
     read -p "Do you want to proceed with finding duplicate files? ([Y]es, any other key for no): " proceed
     proceed=$(echo "$proceed" | tr '[:upper:]' '[:lower:]')
     if [[ "$proceed" != "yes" && "$proceed" != "y" ]]; then
@@ -72,7 +73,7 @@ get_num_threads() {
 ## BEGINNING OF SCRIPT
 
 # Ask the user if they want to use the current directory
-echo ""
+echo
 read -p "Do you want to use the current directory? ([Y]es, any other key for no): " use_current_dir
 use_current_dir=$(echo "$use_current_dir" | tr '[:upper:]' '[:lower:]')
 
@@ -85,11 +86,17 @@ fi
 
 # Call the validate_directory fucntion to verify the provided directory
 validate_directory "$directory"
+echo
+echo -e "Searching for duplicate files the following directory: "$directory
 
 # Count the number of files in the directory
 num_files=$(find "$directory" -type f | wc -l)
 echo
-echo -e "Number of files found in the directory: ${red}$num_files${reset}"
+echo -e "Number of files found in the directory and all subdirectories: ${red}$num_files${reset}"
+
+if [[ "num_files" -gt 50000 ]]; then
+    echo -e "${red}WARNING!${reset} This operation will take a long time to complete due to large file count."
+fi
 
 # Call the function for confirmation before proceeding
 confirm_proceed
@@ -102,9 +109,9 @@ get_num_threads
 # Find and display duplicate files using MD5 hashes with parallel processing and progress indicator
 # Note: The option -print0 for find, -0 for parallel, and -0 for md5sum ensure proper handling of filenames with spaces or special characters.
 duplicate_files=$(find "$directory" -type f -print0 | \
-  parallel --eta -j"$num_threads" -0 md5sum | \
-  sort | \
-  uniq -Dw32)
+parallel --eta -j"$num_threads" -0 md5sum | \
+sort | \
+uniq -Dw32)
 
 # Check if there are duplicate files
 if [[ -z "$duplicate_files" ]]; then
