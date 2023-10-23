@@ -1,4 +1,4 @@
-# Stupid powershell script that will have the machine beep on command.
+# Stupid powershell script that will have the machine sign the Mario Castle theme on command.
 # I honestly have no idea why I made this.
 # Created by Paul Musselman
 
