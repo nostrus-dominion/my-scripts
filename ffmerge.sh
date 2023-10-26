@@ -36,8 +36,6 @@ echo -e "${reset}"
 echo -e "    This script assumes you are within the correct directory. If not please CTRL-C to exit.       "
 echo -e " "
 
-sleep 2s
-
 # File extension input with validation
 while true; do
     read -rp "Please enter the file extension of your media: " file_extensions
