@@ -1,7 +1,29 @@
 #!/bin/bash
 
-echo -e "\033[1;31mWARNING!! THESE DELETIONS ARE PERMANENT!!\033[0m"
-echo -e "\033[1;31mDO NOT USE THIS UNLESS YOU'RE 100% SURE!!\033[0m"
+## Verision 2.0.1
+## Originally Created 2018-07-19
+## License: Open Source GPL
+## Copyright: (c) 2023
+
+# Global variables for ANSI color
+red='\033[1;31m'
+green='\033[1;32m'
+yellow='\033[1;33m'
+reset='\033[0m'
+
+# Script splash
+
+echo -e "${red}"
+echo -e "  _____   ______  _       ______  _______  ______  _____   "
+echo -e " |  __ \ |  ____|| |     |  ____||__   __||  ____||  __ \  "
+echo -e " | |  | || |__   | |     | |__      | |   | |__   | |__) | "
+echo -e " | |  | ||  __|  | |     |  __|     | |   |  __|  |  _  /  "
+echo -e " | |__| || |____ | |____ | |____    | |   | |____ | | \ \  "
+echo -e " |_____/ |______||______||______|   |_|   |______||_|  \_\ "
+echo -e "${reset}"
+echo -e "         ${red}WARNING!! THESE DELETIONS ARE PERMANENT!!${reset}"
+echo -e "         ${red}DO NOT USE THIS UNLESS YOU'RE 100% SURE!!${reset}"
+echo ""
 
 while true; do
     read -p "Are you sure you want to continue? (y/n): " response
@@ -12,44 +34,48 @@ while true; do
     esac
 done
 
-echo "Enter the file extension to delete (e.g. txt): "
-read -r file_extension
-
-if [[ ! $file_extension =~ ^[A-Za-z]+$ ]]
-then
-    echo -e "\033[1;31mError! Invalid file extension entered.\033[0m"
-    echo -e "\033[1;31mExiting script.\033[0m"
-    exit 1
-fi
-
 while true; do
-    echo "Deleting all .$file_extension files. Are you sure you want to continue? (y/n): "
-    read -n 1 response
-    case $response in
-        [Yy]* ) break;;
-        [Nn]* ) exit 1;;
-        * ) echo "Please answer yes (y) or no (n).";;
-    esac
+    read -r -p "Enter the file extension to delete (e.g. txt): " file_extension
+
+    matching_files=$(find . -iname "*.$file_extension")
+
+    if [[ "$matching_files" ]]; then
+	    echo ""
+	    echo -e "${yellow}The following files will be deleted:${reset}"
+	    echo -e "${matching_files}"
+	    echo ""
+
+	    read -p "Are you SURE you want to continue with deletion? (y/n):" response
+	    case $response in
+		    [Yy]* ) break;;
+		    [Nn]* ) exit 1 ;;
+		    * ) echo "You must answer yes (y) or no (n).";;
+	    esac
+    else
+            echo -e "${red}Error! No files found with this file extension!${reset}"
+            echo -e "${red}Please enter a valid file extension!${reset}"
+    fi
 done
 
+echo
 echo "Last chance to exit script."
-echo "Five second countdown to [CTRL-C] to cancel"
+echo "10 second countdown to [CTRL-C] to cancel"
 
-for i in {5..1}; do
-    if [ "$i" -lt 4 ]
+for i in {10..1}; do
+    if [ "$i" -ge 6 ]
     then
-        echo -ne "\033[1;32m$i.\033[0m"
-    elif [ "$i" -lt 3 ]
+        echo -ne "${green}$i. ${reset}"
+    elif [ "$i" -ge 3 ]
     then
-        echo -ne "\033[1;33m$i.\033[0m"
+        echo -ne "${yellow}$i. ${reset}"
     else
-        echo -ne "\033[1;31m$i.\033[0m"
+        echo -ne "${red}$i. ${reset}"
     fi
     sleep 1
 done
 
-echo
-echo "Deleting all .$file_extension files..."
 find . -name "*.$file_extension" -exec rm -rf {} \;
 
-echo "Finished!"
+echo ""
+echo "All .$file_extension files have been deleted!"
+echo "Hope you were sure!"
