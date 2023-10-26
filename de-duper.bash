@@ -74,15 +74,17 @@ get_num_threads() {
 
 # Ask the user if they want to use the current directory
 echo
-read -p "Do you want to use the current directory? ([Y]es, any other key for no): " use_current_dir
-use_current_dir=$(echo "$use_current_dir" | tr '[:upper:]' '[:lower:]')
+read -p "Do you want to use the current directory to check for duplicate files? ([Y]es, [N]o, [Q]uit): " choice
+choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
 
-if [[ "$use_current_dir" == "yes" || "$use_current_dir" == "y" ]]; then
-    directory=$(pwd)
-else
-    # Ask for a new directory input if the user does not want to use the current directory
-    read -p "Enter the directory path to search for duplicate files: " directory
-fi
+case "$choice" in
+    y) directory=$(pwd) ;;
+    n) read -p "Enter the directory path to search for duplicate files: " directory ;;
+    q) echo "Exiting script. Goodbye!"
+       exit 0 ;;
+    *) echo "Invalid choice! EXITING SCRIPT!"
+       exit 1 ;;
+esac
 
 # Call the validate_directory fucntion to verify the provided directory
 validate_directory "$directory"
@@ -115,13 +117,17 @@ uniq -Dw32)
 
 # Check if there are duplicate files
 if [[ -z "$duplicate_files" ]]; then
+    echo ""
     echo "No duplicate files found!"
     echo "Exiting script! Goodbye!"
+    echo ""
     exit 0
 else
     # Save duplicate files to 'duplicate-files.txt' in the user's home directory
+    echo ""
     echo "$duplicate_files" > "$HOME/duplicate-files.txt"
     echo "Duplicate files found. Results saved to $HOME/duplicate-files.txt"
     echo "Exiting script! Goodbye!"
+    echo ""
     exit 0
 fi
