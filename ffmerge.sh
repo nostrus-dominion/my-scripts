@@ -32,9 +32,9 @@ echo -e ' | |__  | |__  | \  / | |__  | |__) | |  __| |__        | (___ | |    |
 echo -e ' |  __| |  __| | |\/| |  __| |  _  /| | |_ |  __|        \___ \| |    |  _  /  | | |  ___/  | |   '
 echo -e ' | |    | |    | |  | | |____| | \ \| |__| | |____       ____) | |____| | \ \ _| |_| |      | |   '
 echo -e ' |_|    |_|    |_|  |_|______|_|  \_\\_____|______|     |_____/ \_____|_|  \_\_____|_|      |_|   '
-echo -e "${reset}"
+echo -e ""
 echo -e "    This script assumes you are within the correct directory. If not please CTRL-C to exit.       "
-echo -e " "
+echo -e "${reset} "
 
 # File extension input with validation
 while true; do
