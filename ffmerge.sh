@@ -24,6 +24,8 @@ done
 # Script splash
 echo -e "${brown}"
 echo -e "                                          Welcome to FFMERGE SCRIPT                               "
+echo -e "                            This script will merge multiple media files into one file.            "
+echo -e ""
 echo -e '  ______ ______ __  __ ______ _____   _____ ______        _____  _____ _____  _____ _____ _______ '
 echo -e ' |  ____|  ____|  \/  |  ____|  __ \ / ____|  ____|      / ____|/ ____|  __ \|_   _|  __ \__   __|'
 echo -e ' | |__  | |__  | \  / | |__  | |__) | |  __| |__        | (___ | |    | |__) | | | | |__) | | |   '
