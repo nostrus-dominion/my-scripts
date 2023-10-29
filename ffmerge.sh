@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #FFMERGE
-#Version 1.1
+#Version 1.5
 #License: Open Source (GPL)
 #Copyright: (c) 2023
 #Dependancy: ffmpeg, ffprobe
@@ -9,6 +9,7 @@
 # Global Variables for ANSI color
 brown='\033[0;33m'
 red='\033[0;31m'
+yellow='\033[0;32m'
 reset='\033[0m'
 
 #Checking if dependancies are installed
@@ -21,55 +22,26 @@ for dep in "${deps[@]}"; do
   fi
 done
 
-# Script splash
-echo -e "${brown}"
-echo -e "                                          Welcome to FFMERGE SCRIPT                               "
-echo -e "                            This script will merge multiple media files into one file.            "
-echo -e ""
-echo -e '  ______ ______ __  __ ______ _____   _____ ______        _____  _____ _____  _____ _____ _______ '
-echo -e ' |  ____|  ____|  \/  |  ____|  __ \ / ____|  ____|      / ____|/ ____|  __ \|_   _|  __ \__   __|'
-echo -e ' | |__  | |__  | \  / | |__  | |__) | |  __| |__        | (___ | |    | |__) | | | | |__) | | |   '
-echo -e ' |  __| |  __| | |\/| |  __| |  _  /| | |_ |  __|        \___ \| |    |  _  /  | | |  ___/  | |   '
-echo -e ' | |    | |    | |  | | |____| | \ \| |__| | |____       ____) | |____| | \ \ _| |_| |      | |   '
-echo -e ' |_|    |_|    |_|  |_|______|_|  \_\\_____|______|     |_____/ \_____|_|  \_\_____|_|      |_|   '
-echo -e ""
-echo -e "    This script assumes you are within the correct directory. If not please CTRL-C to exit.       "
-echo -e "${reset} "
+## FUNCTIONS
 
-# File extension input with validation
-while true; do
-    read -rp "Please enter the file extension of your media: " file_extensions
-    if [[ -n "$file_extensions" ]]; then
-        if ls ./*."$file_extensions" 1> /dev/null 2>&1; then
-            break
-        else
-            echo "ERROR: No files found with that extension. Please try again."
-        fi
-    else
-        echo "ERROR: File extension cannot be blank. Please try again."
+# Function to validate if the provided path is a directory
+function validate_directory {
+    local dir=$1
+    if [ ! -d "$dir" ]; then
+	echo
+        echo -e "Error: The provided path is not a directory."
+		echo
+        return 1
     fi
-done
-
-# New name input
-while true; do
-    read -rp "Please enter the new name of your media: " new_output
-    if [[ -n "$new_output" ]]; then
-        break
-    else
-        echo "ERROR: New name cannot be blank. Please try again."
-    fi
-done
-
-# Countdown for user confirmation to cancel
-echo -e "Five second countdown to [CTRL-C] to cancel"
-for i in {5..1};do echo -n "$i." && sleep 1; done
-echo ""
+}
 
 # Function to validate filenames and make changes as needed
 function check_filenames {
     local invalid_files=0
-
+	
     echo -e "Checking for unsupported filenames..."
+	echo -e ""
+	sleep 4
 
     for f in ./*; do
         if [[ "$f" == *"'"* ]]; then
@@ -81,14 +53,25 @@ function check_filenames {
     done
 
     if [[ $invalid_files -eq 0 ]]; then
-        echo "All filenames are valid!"
+        echo -e "All filenames are valid!"
+		echo -e ""
     fi
-
+	
+	sleep 1
+	
     echo -e "Checking for unsupported filenames DONE!"
 }
 
-# Call check_filenames
-check_filenames
+# Function to confirm user wants to proceed after file count
+function confirm_proceed {
+    echo -e
+    read -p "Proceed with merging all .$file_extensions files into $new_output.$file_extensions file? ([Y]es, any other key for no): " proceed
+    proceed=$(echo "$proceed" | tr '[:upper:]' '[:lower:]')
+    if [[ "$proceed" != "yes" && "$proceed" != "y" ]]; then
+        echo -e "${red}Aborted by user. Exiting script.${reset}"
+        exit 0
+    fi
+}
 
 # Function to display a progress bar
 function show_progress {
@@ -109,8 +92,9 @@ function show_progress {
 
 # Function to validate codec and container of all files using ffprobe
 function validate_files {
-    echo "Validating file codecs and containers..."
-    local total_files
+    echo -e ""
+	echo "Validating file codecs and containers..."
+	local total_files
     total_files=$(find . -maxdepth 1 -type f -name "*.$file_extensions" | wc -l)
     local current_file=0
     local file_info
@@ -122,23 +106,17 @@ function validate_files {
         file_info=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file")
         file_codec=$(head -n 1 <<< "$file_info")
 
-        file_info=$(ffprobe -v error -show_entries format=format_name -of default=noprint_wrappers=1:nokey=1 "$file")
-        file_container=$(head -n 1 <<< "$file_info")
-
         # Initialize codec and container if not set
         if [[ -z "$codec" ]]; then
             codec="$file_codec"
         fi
-
-        if [[ -z "$container" ]]; then
-            container="$file_container"
-        fi
-
+		
         # Compare codec and container with previous files
-        if [[ "$file_codec" != "$codec" || "$file_container" != "$container" ]]; then
-            echo ""
-            echo -e "${red}CRITICAL ERROR!! $file has a different codec or container!"
+        if [[ "$file_codec" != "$codec" ]]; then
+            echo -e ""
+            echo -e "${red}CRITICAL ERROR!! $file has a different codec!"
             echo -e "${red}EXITING SCRIPT!!${reset}"
+			echo -e ""
             exit 1
         fi
 
@@ -148,17 +126,104 @@ function validate_files {
         show_progress "$progress"
     done
 
-    echo ""  # Move to the next line after the progress bar is completed
-    echo "All files codecs and containers have been validated!!"
+    echo -e ""  # Move to the next line after the progress bar is completed
+	echo -e ""  # Adds a space between progress bar
+    echo -e "All files codecs and containers have been validated!!"
+	sleep 1
 }
 
-# ...
+## SCRIPT BEGINNING
+
+# Script splash
+echo -e "${brown}"
+echo -e "                                   Welcome to FFMERGE SCRIPT                                       "
+echo -e "                   This script will merge multiple media files into one file.                      "
+echo -e ""
+echo -e '  ______ ______ __  __ ______ _____   _____ ______        _____  _____ _____  _____ _____ _______  '
+echo -e ' |  ____|  ____|  \/  |  ____|  __ \ / ____|  ____|      / ____|/ ____|  __ \|_   _|  __ \__   __| '
+echo -e ' | |__  | |__  | \  / | |__  | |__) | |  __| |__        | (___ | |    | |__) | | | | |__) | | |    '
+echo -e ' |  __| |  __| | |\/| |  __| |  _  /| | |_ |  __|        \___ \| |    |  _  /  | | |  ___/  | |    '
+echo -e ' | |    | |    | |  | | |____| | \ \| |__| | |____       ____) | |____| | \ \ _| |_| |      | |    '
+echo -e ' |_|    |_|    |_|  |_|______|_|  \_\\\_____|______|     |_____/ \_____|_|  \_\_____|_|      |_|   '
+echo -e ""
+echo -e "                    This script assumes you are within the correct directory.                      "
+echo -e "                    If not please enter the directory you want or use 'Q' to quit.                 "
+echo -e "${reset} "
+
+# Ask the user if they are in the correct directory
+current_directory=$(pwd)
+while true; do
+    echo -e "Your current directory is: " $current_directory  # Print the directory the user is
+    echo -e ""
+    read -p "Do you want to use the current directory to merge media files? ([Y]es, [N]o, [Q]uit): " choice
+    echo -e ""
+	choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
+
+    case "$choice" in
+        y) directory=$(pwd)
+            break ;;  # Break the loop if the user chooses the current directory
+        n) read -p "Enter the directory path to merge media files: " directory
+            # Calls the validate_directory function and continue the loop if it's invalid
+            if validate_directory "$directory"; then
+                break
+            fi ;;
+        q) echo "Exiting script. Goodbye!"
+           exit 0 ;;
+        *) echo "Invalid choice! Please try again." 
+		   echo ;;
+    esac
+done
+
+# List files in directory
+echo "Files available in the current directory:"
+echo 
+for file in *.*; do
+	echo "$file"
+done
+echo
+
+# Find file extension and validate
+while true; do
+    read -rp "Please enter the extension of the media you want to combine: " file_extensions
+    if [[ -n "$file_extensions" ]]; then
+        if ls ./*."$file_extensions" 1> /dev/null 2>&1; then
+            break
+        else
+            echo "ERROR: No files found with that extension. Please try again."
+        fi
+    else
+        echo "ERROR: File extension cannot be blank. Please try again."
+    fi
+done
+
+# New output name
+while true; do
+    read -rp "Please enter the new name of your media: " new_output
+    if [[ -n "$new_output" ]]; then
+        # Check if the new_output already exists in the current directory
+        if [[ -e "$new_output.$file_extensions" ]]; then
+            echo "ERROR: '$new_output.$file_extensions' already exists in this directory. Please choose a different name."
+        else
+            break
+        fi
+    else
+        echo "ERROR: New name cannot be blank. Please try again."
+    fi
+done
+
+# Call the check filesnames Function
+echo
+check_filenames
+
+# Call confirm_proceed Function
+confirm_proceed
 
 # Call the validate_files function
 validate_files
 
 # Creation of concat list and running ffmpeg to merge files
 echo -e "Attempting to combine files..."
+sleep 2
 for f in ./*."$file_extensions"; do
     echo "file '$f'" >> list.txt
 done
@@ -169,8 +234,8 @@ wait $pid
 ffmpeg_exit_code=$? # Exit code for ffmpeg
 if [[ $ffmpeg_exit_code -ne 0 ]]; then
     rm list.txt
-    echo "${red}CRITICAL ERROR!! FFMPEG has encountered a problem! Exit code: $ffmpeg_exit_code"
-    echo "${red}EXITING SCRIPT !!${reset}"
+    echo -e "${red}CRITICAL ERROR!! FFMPEG has encountered a problem! Exit code: $ffmpeg_exit_code"
+    echo -e "${red}EXITING SCRIPT !!${reset}"
     exit 1
 fi
 
@@ -178,8 +243,11 @@ fi
 if [[ -f "list.txt" ]]; then
     echo -e ""
     echo -e "The following files will be deleted:"
-        cat list.txt
-
+	echo
+	# Reads files with the specified file extension from list.txt
+    grep "\\.$file_extensions'$" list.txt
+	echo
+    
     # Set a 30-second timeout for user input
     if read -t 30 -rp "Do you wish to delete these files? (y/n): " confirm_delete; then
         # User provided input within the 30-second timeout
