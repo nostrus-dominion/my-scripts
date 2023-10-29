@@ -90,28 +90,27 @@ function show_progress {
     echo -ne "\r$progress_bar"
 }
 
-# Function to validate codec and container of all files using ffprobe
+# Function to validate codec of all files using ffprobe
 function validate_files {
     echo -e ""
-	echo "Validating file codecs and containers..."
+	echo "Validating file codecs..."
 	local total_files
     total_files=$(find . -maxdepth 1 -type f -name "*.$file_extensions" | wc -l)
     local current_file=0
     local file_info
     local file_codec
-    local file_container
 
     for file in *."$file_extensions"; do
-        # Get codec and container using ffprobe and store it in a variable
+        # Get codec using ffprobe and store it in a variable
         file_info=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "$file")
         file_codec=$(head -n 1 <<< "$file_info")
 
-        # Initialize codec and container if not set
+        # Initialize codec if not set
         if [[ -z "$codec" ]]; then
             codec="$file_codec"
         fi
 		
-        # Compare codec and container with previous files
+        # Compare codec with previous files
         if [[ "$file_codec" != "$codec" ]]; then
             echo -e ""
             echo -e "${red}CRITICAL ERROR!! $file has a different codec!"
@@ -128,7 +127,7 @@ function validate_files {
 
     echo -e ""  # Move to the next line after the progress bar is completed
 	echo -e ""  # Adds a space between progress bar
-    echo -e "All files codecs and containers have been validated!!"
+    echo -e "All files codecs have been validated!!"
 	sleep 1
 }
 
