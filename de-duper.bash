@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Verision 2.0.1
+## Verision 2.1
 ## V1 Created 2021-02-07
 ## License: Open Source GPL
 ## Copyright: (c) 2023
@@ -115,7 +115,9 @@ parallel --eta -j"$num_threads" -0 md5sum | \
 sort | \
 uniq -Dw32)
 
-# Check if there are duplicate files
+# Create duplicate-files.txt with timestamp for individual runs
+timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+
 if [[ -z "$duplicate_files" ]]; then
     echo ""
     echo "No duplicate files found!"
@@ -125,8 +127,8 @@ if [[ -z "$duplicate_files" ]]; then
 else
     # Save duplicate files to 'duplicate-files.txt' in the user's home directory
     echo ""
-    echo "$duplicate_files" > "$HOME/duplicate-files.txt"
-    echo "Duplicate files found. Results saved to $HOME/duplicate-files.txt"
+    echo "$duplicate_files" > "$HOME/duplicate-files-$timestamp.txt"
+    echo "Duplicate files found. Results saved to $HOME/duplicate-files-$timestamp.txt"
     echo "Exiting script! Goodbye!"
     echo ""
     exit 0
