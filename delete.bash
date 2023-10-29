@@ -1,9 +1,11 @@
 #!/bin/bash
 
-## Verision 2.0.1
+## Verision 2.1
 ## Originally Created 2018-07-19
 ## License: Open Source GPL
 ## Copyright: (c) 2023
+
+## ALL THE BORING STUFF
 
 # Global variables for ANSI color
 red='\033[1;31m'
@@ -40,17 +42,17 @@ while true; do
     matching_files=$(find . -iname "*.$file_extension")
 
     if [[ "$matching_files" ]]; then
-	    echo ""
-	    echo -e "${yellow}The following files will be deleted:${reset}"
-	    echo -e "${matching_files}"
-	    echo ""
+            echo ""
+            echo -e "${yellow}The following files will be deleted:${reset}"
+            echo -e "${matching_files}"
+            echo ""
 
-	    read -p "Are you SURE you want to continue with deletion? (y/n):" response
-	    case $response in
-		    [Yy]* ) break;;
-		    [Nn]* ) exit 1 ;;
-		    * ) echo "You must answer yes (y) or no (n).";;
-	    esac
+            read -p "Are you SURE you want to continue with deletion? (y/n):" response
+            case $response in
+                    [Yy]* ) break;;
+                    [Nn]* ) exit 1 ;;
+                    * ) echo "You must answer yes (y) or no (n).";;
+            esac
     else
             echo -e "${red}Error! No files found with this file extension!${reset}"
             echo -e "${red}Please enter a valid file extension!${reset}"
