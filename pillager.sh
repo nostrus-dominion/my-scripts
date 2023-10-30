@@ -1,24 +1,112 @@
 #!/bin/bash
 
-# Originally created by theaquacadet on github
-# Edited by Paul Musselman on Nov. 19, 2017
+## Version 2.0
+## License: Open Source GPL
+## Copyright: (c) 2023
 
-[[ -d $HOME/.pillager ]] || mkdir "$HOME"/.pillager
+# Color variables
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+cyan='\033[0;36m'
+reset='\033[0m' # No Color
 
-# Download directory
+# Checking if dependencies are installed
+dependencies=("wget")
+for cmd in "${dependencies[@]}"
+do
+  if ! command -v "$cmd" > /dev/null 2>&1; then
+    echo -e "${red}  ERROR:${reset} The command ${red} '$cmd' ${reset}is not installed, quitting :(" >&2
+    exit 1
+  fi
+done
 
-currentdir="$PWD"
-SAVEPATH="${1-$currentdir}"
+# Function to initialize script variables
+initialize() {
+    [[ -d $HOME/.pillager ]] || mkdir "$HOME/.pillager"
+    SAVEPATH="$PWD"
+    LIST=$HOME/.pillager/list
+    INDEX="--reject index.html,index.html*"
+    FLAGS="-r -np -nc "
+    LOG="/tmp/website-size-log"
+}
 
-#Save link adresses to /home/*/.pillager/list
+# Function to display help message
+show_help() {
+    echo "HELP"
+    echo "By default, pillager will download all files"
+    echo "recursively from a given link, avoiding index.html files,"
+    echo "to the current working directory. A list of pillaged"
+    echo "links is saved to ~/.pillager/list."
+    echo "If no link is provided when called, you'll be prompted for a link."
+    echo "OPTIONS"
+    echo "-d [PATH]: Change download directory"
+    echo "-h:        Show this message"
+    echo "-i:        Include index.html files"
+    echo "-l [LINK]: Link to pillage"
+    echo "-m:        Mirror site"
+    echo "-s:        Estimate link size"
+    exit 1
+}
 
-list=$HOME/.pillager/list
-echo -n "Link to pillage: "
+# Function to parse command-line options
+parse_options() {
+    while getopts 'ishmd:l:' flag; do
+        case "${flag}" in
+            i) INDEX=" " ;;
+            h) show_help ;;
+            d) SAVEPATH="${OPTARG}" ;;
+            m) FLAGS="-mkEpnp "
+               INDEX=" " ;;
+            l) LFLAG=1
+               LINK="${OPTARG}" ;;
+            s) SFLAG=1 ;;
+            *) show_help ;;
+        esac
+    done
+}
 
-read -r LINK
+# Function to prompt user for link if not provided
+get_link() {
+    if [ -z "$LINK" ]; then
+        echo -n "Link to pillage: "
+        read -r LINK
+    fi
+}
 
-echo "$LINK" >> "$list"
+# Function to estimate website size
+estimate_size() {
+    echo "Crawling site..."
+    wget -rSnd -np -l inf --spider -o "$LOG" "${LINK}"
+    echo "Finished crawling."
+    sleep 1s
+    echo "Estimated size: $(grep -e "Content-Length" "$LOG" | \
+        awk '{sum+=$2} END {printf("%.0f", sum / 1024 / 1024)}'\
+    ) Mb"
+    rm "$LOG"
+}
 
-wget -r -nH -np -nc -e robots=off -c --reject html,tmp "${LINK}" -P "$SAVEPATH"
+# Function to download files
+download_files() {
+    echo "$LINK" >> "$LIST"
+    wget $FLAGS -e robots=off -c $INDEX "${LINK}" -P "$SAVEPATH"
+}
 
-echo "Finished. Yar."
+# Main function
+main() {
+    initialize     # Initialize script variables
+    parse_options "$@"  # Parse command-line options
+    get_link           # Prompt user for link if not provided
+
+    # Perform actions based on options
+    if [ -v "$SFLAG" ]; then
+        estimate_size   # Estimate website size
+    else
+        download_files  # Download files
+    fi
+
+    echo "Finished. Yar."
+}
+
+# Call the main function with command-line arguments
+main "$@"
