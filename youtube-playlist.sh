@@ -1,1 +1,0 @@
-youtube-dl --yes-playlist --add-metadata -f 140 -o "%(playlist_index)s-%(title)s.%(ext)s" --extract-audio --audio-format mp3
