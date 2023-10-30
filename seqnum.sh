@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Verision 1.5
+## Verision 1.6
 ## License: Open Source GPL
 ## Copyright: (c) 2023
 
@@ -17,34 +17,48 @@ echo -e "    Sequential Number Generator Script    "
 echo -e "${reset}"
 
 ## BEGINNING OF SCRIPT
-count=1
-read -p "Enter a prefix for filenames: " user_prefix
 
-echo "Preview of filename changes: "
+read -p "Enter a prefix: " user_prefix
+echo -e ""
+
+# Create an array to store file names
+files=()
+
+# Populate the array with file names
 for file in *; do
   if [[ -f "$file" ]]; then
-    extension="${file##*.}"  # Extract the file extension
-    printf -v padded_count "%03d" "$count"  # Pad the count with leading zeros
-    new_name="${user_prefix}_${padded_count}.${extension}"
-    echo "  $file -> $new_name"
-    ((count++))
+    files+=("$file")
   fi
 done
 
-read -p "Do you want to proceed with these changes? (y/n) " choice
-if [[ $choice =~ ^[Yy]$ ]]; then
-  count=1  # Reset count for renaming
-  for file in *; do
-    if [[ -f "$file" ]]; then
-      extension="${file##*.}"  # Extract the file extension
-      printf -v padded_count "%03d" "$count"  # Pad the count with leading zeros
-      new_name="${user_prefix}_${padded_count}.${extension}"
-      mv "$file" "$new_name"
-      ((count++))
-    fi
+# Sort the array to maintain the original order
+sorted_files=($(printf "%s\n" "${files[@]}" | sort))
+
+# Display filename changes before renaming
+count=1
+for file in "${sorted_files[@]}"; do
+  extension="${file##*.}"  # Extract the file extension
+  printf -v padded_count "%03d" "$count"  # Pad the count with leading zeros to make it 3 digits long
+  new_name="${user_prefix}_${padded_count}.${extension}"
+  echo "[$file] --> [$new_name]"
+  ((count++))
+done
+
+# Ask for confirmation before renaming the files
+echo -e ""
+read -p "Confirm renaming the files? (y/n): " confirm
+echo -e ""
+if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+  # Rename the files with padded numbers
+  count=1
+  for file in "${sorted_files[@]}"; do
+    extension="${file##*.}"  # Extract the file extension
+    printf -v padded_count "%03d" "$count"  # Pad the count with leading zeros to make it 3 digits long
+    new_name="${user_prefix}_${padded_count}.${extension}"
+    mv "$file" "$new_name"
+    ((count++))
   done
   echo "Files renamed successfully."
 else
-  echo "No changes were made. Exiting Script!"
-  exit 1;
+  echo "Files not renamed."
 fi
