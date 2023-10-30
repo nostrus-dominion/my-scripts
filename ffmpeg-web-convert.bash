@@ -6,27 +6,40 @@
 ## Dependencies: FFmpeg, FFprobe
 
 # Color variables
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+cyan='\033[0;36m'
+reset='\033[0m' # No Color
 
 # Checking if dependencies are installed
 dependencies=("ffmpeg" "ffprobe")
 for cmd in "${dependencies[@]}"
 do
   if ! command -v "$cmd" > /dev/null 2>&1; then
-    echo -e "${RED}  ERROR:${NC} The command ${RED} '$cmd' ${NC}is not installed, quitting :(" >&2
+    echo -e "${red}  ERROR:${reset} The command ${red} '$cmd' ${reset}is not installed, quitting :(" >&2
     exit 1
   fi
 done
+
+# Script splash
+echo -e "${brown}"
+echo -e "			**********************************************			"
+echo -e "			*                                            *			"
+echo -e "			*           File Converter for Web           *			"
+echo -e "			*               by Using FFMPEG              *			"
+echo -e "           *                      						 *			"
+echo -e "			**********************************************			"
+echo -e ""
+echo -e "			This script uses FFMpeg to convert media files 			"
+echo -e "			into a file that can be easily played on teh web.		"
+echo -e "${reset}"
 
 # Get the directory path from the user and validate it
 read -r -p "Enter the directory path: " directory
 if [ ! -d "$directory" ]
 then
-  echo -e "${RED}Invalid directory path.${NC} Please enter a valid directory path and try again."
+  echo -e "${red}Invalid directory path.${reset} Please enter a valid directory path and try again."
   exit 1
 fi
 
@@ -44,7 +57,7 @@ then
       audio_codec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nw=1 "$file")
       if [ "$video_codec" == "h264" ] && [ "$audio_codec" == "aac" ]
       then
-        echo -e "${YELLOW}Skipping $file as it already has the desired codecs.${NC}"
+        echo -e "${yellow}Skipping $file as it already has the desired codecs.${reset}"
         sleep 2
         continue
       fi
