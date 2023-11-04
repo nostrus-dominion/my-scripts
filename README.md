@@ -1,3 +1,3 @@
 # My Scripts
 
-Just a bunch of shitty scripts and files to remind me of my favorite flags 
+Just a bunch of shitty scripts that do things that I used to do on repeat.
