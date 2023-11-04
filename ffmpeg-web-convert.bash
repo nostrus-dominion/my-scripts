@@ -24,15 +24,16 @@ done
 
 # Script splash
 echo -e "${brown}"
-echo -e "			**********************************************			"
-echo -e "			*                                            *			"
-echo -e "			*           File Converter for Web           *			"
-echo -e "			*               by Using FFMPEG              *			"
-echo -e "			*                      						 *			"
-echo -e "			**********************************************			"
+echo -e "   ******************************    "
+echo -e "   *                            *    "
+echo -e "   *   File Converter for Web   *    "
+echo -e "   *       by Using FFMPEG      *    "
+echo -e "   *                            *    "
+echo -e "   ******************************    "
 echo -e ""
-echo -e "			This script uses FFMpeg to convert media files 			"
-echo -e "			into a file that can be easily played on teh web.		"
+echo -e "   This script uses FFMpeg to convert  "
+echo -e "   media files so that they can be     "
+echo -e "   played on the web with no transcode."
 echo -e "${reset}"
 
 # Get the directory path from the user and validate it
