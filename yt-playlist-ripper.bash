@@ -42,12 +42,21 @@ validate_playlist_url() {
     url_pattern="^(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/playlist"
 
     if [[ $playlist_url =~ $url_pattern ]]; then
-        return 0 # Valid URL
+        # Use curl to send a request to the URL and check the response status code
+        http_status=$(curl -s -o /dev/null -w "%{http_code}" "$playlist_url")
+
+        if [[ $http_status -ge 200 && $http_status -lt 300 ]]; then
+            return 0 # Valid URL
+        else
+            echo "Error: Invalid playlist URL. Please enter a valid YouTube playlist URL."
+            return 1 # Invalid URL
+        fi
     else
-        echo "Error: Invalid playlist URL. Please enter a valid YouTube playlist URL."
-        return 1 # Invalid URL
+        echo "Error: Invalid playlist URL format. Please enter a valid YouTube playlist URL."
+        return 1 # Invalid URL format
     fi
 }
+
 
 # Prompt the user for a valid playlist URL
 while ! validate_playlist_url; do
