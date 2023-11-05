@@ -1,8 +1,23 @@
 #!/bin/bash
 
+## Version 1.0
+## License: Open Source GPL
+## Copyright: (c) 2023
+
+## ALL THE BORING STUFF
+
+# Global Color Variables
+brown='\033[0;33m'
+red='\033[0;31m'
+reset='\033[0m'
+
+#
+## BEGINNING OF SCRIPT
+#
+
 while true; do
     # Prompt the user for file name pattern
-    read -p "Enter file name pattern (or 'exit' to quit, or 'clear' to clean screen): " pattern
+    read -p "Enter file name pattern (or ${brown}'exit'${reset} to quit, or ${brown}'clear'${reset} to clean screen): " pattern
 
     # Check user input
     if [ "$pattern" == "clear" ]; then
@@ -17,7 +32,7 @@ while true; do
     fi
 
     if [ -z "$pattern" ]; then
-            echo "ERROR! Input cannot be empty. Please try again."
+            echo -e "${red}ERROR!${reset} Input cannot be empty. Please try again."
             continue
     fi
 
@@ -26,15 +41,15 @@ while true; do
 
     if [ -z "$matching_files" ]; then
         #If no matching file found prints error message
-        echo -e "\e[31mNo matching file found! Try again!\e[0m"
+        echo -e "${red}No matching file found! Try again!${reset}"
     else
-        echo
+        echo ""
         echo "Found the following files matching '$pattern':"
         echo "$matching_files" | sort
 
     fi
 
     # Add a newline for better readability
-    echo
+    echo ""
 
 done
