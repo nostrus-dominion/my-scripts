@@ -5,7 +5,7 @@ brown='\033[0;33m'
 reset='\033[0m'
 
 # Checking if dependancies are installed
-deps=("jq")
+deps=("jq" "curl")
 
 for dep in "${deps[@]}"; do
 if ! which "$dep" > /dev/null; then
