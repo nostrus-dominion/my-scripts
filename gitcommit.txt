@@ -1,0 +1,1 @@
+This is a test to ensure git is configured correctly on my computer.
