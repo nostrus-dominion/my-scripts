@@ -18,7 +18,7 @@ deps=("parallel" "find" "md5sum")
 
 for dep in "${deps[@]}"; do
 if ! which "$dep" > /dev/null; then
-    echo "${red}CRITCAL ERROR!!: $dep is not installed or not in the PATH${reset}"
+    echo -e "${red}CRITCAL ERROR!!: $dep is not installed or not in the PATH${reset}"
     exit 1
 fi
 done
