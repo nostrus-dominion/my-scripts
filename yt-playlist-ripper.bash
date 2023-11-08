@@ -29,7 +29,7 @@ echo -e "			**********************************************			"
 echo -e "			*                                            *			"
 echo -e "			*           Welcome to the Youtube           *			"
 echo -e "			*               Playlist Ripper              *			"
-echo -e "           *                      						 *			"
+echo -e "	                *                      			     *			"
 echo -e "			**********************************************			"
 echo -e ""
 echo -e "			This script rips videos from a YouTube playlist			"
@@ -79,7 +79,7 @@ download_playlist() {
         --write-sub \
         --sub-lang en \
         --sub-format ass \
-        --output "%(playlist_index)s - %(title)s.%(ext)s" \
+        --output "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s" \ # Specify directory structure
         --download-archive downloaded.txt \
         "$playlist_url"
 }
