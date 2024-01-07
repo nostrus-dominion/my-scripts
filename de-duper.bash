@@ -23,15 +23,6 @@ if ! which "$dep" > /dev/null; then
 fi
 done
 
-# Script splash
-echo -e "${brown}"
-echo -e "                                WELCOME TO THE SUPER-DE-DUPER SCRIPT                              "
-echo -e "       ___  __  __  ____  ____  ____       ____   ____       ____   __  __  ____  ____  ____      "
-echo -e "      / __)(  )(  )(  _ \( ___)(  _ \ ___ (  _ \ ( ___) ___ (  _ \ (  )(  )(  _ \( ___)(  _ \     "
-echo -e "      \__ \ )(__)(  )___/ )__)  )   /(___) )(_) ) )__) (___) )(_) ) )(__)(  )___/ )__)  )   /     "
-echo -e "      (___/(______)(__)  (____)(_)\_)     (____/ (____)     (____/ (______)(__)  (____)(_)\_)     "
-echo -e "${reset}"
-
 ## FUNCTIONS
 
 # Function to validate if the provided path is a directory
@@ -72,6 +63,16 @@ get_num_threads() {
 
 ## BEGINNING OF SCRIPT
 
+# Script splash
+echo -e "${brown}"
+echo -e "                                WELCOME TO THE SUPER-DE-DUPER SCRIPT                              "
+echo -e "       ___  __  __  ____  ____  ____       ____   ____       ____   __  __  ____  ____  ____      "
+echo -e "      / __)(  )(  )(  _ \( ___)(  _ \ ___ (  _ \ ( ___) ___ (  _ \ (  )(  )(  _ \( ___)(  _ \     "
+echo -e "      \__ \ )(__)(  )___/ )__)  )   /(___) )(_) ) )__) (___) )(_) ) )(__)(  )___/ )__)  )   /     "
+echo -e "      (___/(______)(__)  (____)(_)\_)     (____/ (____)     (____/ (______)(__)  (____)(_)\_)     "
+echo -e "${reset}"
+
+
 # Ask the user if they want to use the current directory
 echo
 read -p "Do you want to use the current directory to check for duplicate files? ([Y]es, [N]o, [Q]uit): " choice
@@ -109,7 +110,8 @@ get_num_threads
 ## WHERE THE PARTY STARTS
 
 # Find and display duplicate files using MD5 hashes with parallel processing and progress indicator
-# Note: The option -print0 for find, -0 for parallel, and -0 for md5sum ensure proper handling of filenames with spaces or special characters.
+# and using -print0 with find, -0 with parallel, and -0 for the md5sum checksum ensures proper handling
+# of filenames with spaces or special characters.
 duplicate_files=$(find "$directory" -type f -print0 | \
 parallel --eta -j"$num_threads" -0 md5sum | \
 sort | \
