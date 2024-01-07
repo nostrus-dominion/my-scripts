@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#Version 0.5
+# MUST RUN AS ROOT
+
 # Get the current IP address from vsftpd.conf
 current_ip=$(grep -oP 'pasv_address=\K[^ ]+' /etc/vsftpd.conf)
 
