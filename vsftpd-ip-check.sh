@@ -1,7 +1,12 @@
 #!/bin/bash
 
-#Version 0.5
-# MUST RUN AS ROOT
+#Version 0.6
+
+# Check if the script is run as root
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root"
+  exit 1
+fi
 
 # Get the current IP address from vsftpd.conf
 current_ip=$(grep -oP 'pasv_address=\K[^ ]+' /etc/vsftpd.conf)
