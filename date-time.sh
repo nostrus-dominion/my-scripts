@@ -27,7 +27,7 @@ fi
 read -p "Enter the desired date and time (YYYY-MM-DD HH:MM:SS): " target_datetime
 
 # Validate the date and time format
-if ! [[ $target_datetime =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$ ]]; then
+if ! expr "$target_datetime" : '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}$' >/dev/null; then
     echo "Invalid date and time format. Please use the format YYYY-MM-DD HH:MM:SS."
     exit 1
 fi
