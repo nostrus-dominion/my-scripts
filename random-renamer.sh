@@ -6,18 +6,23 @@ if ! command -v rename &> /dev/null; then
     exit 1
 fi
 
-# Check if a directory is provided
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <directory>"
-    exit 1
-fi
-
-directory="$1"
+# Set the default directory to the current directory if not provided
+directory="${1:-"$PWD"}"
 
 # Check if the provided directory exists
 if [ ! -d "$directory" ]; then
     echo "Error: Directory '$directory' does not exist."
     exit 1
+fi
+
+# Count the number of files in the directory
+numOfFiles=$(find "$directory" -maxdepth 1 -type f | wc -l)
+
+# Confirmation prompt
+read -p "Are you sure you want to rename $numOfFiles files in '$directory'? (y/N): " confirmation
+if [[ ! $confirmation =~ ^[Yy]$ ]]; then
+    echo "Operation cancelled."
+    exit 0
 fi
 
 # Change to the directory
@@ -37,4 +42,3 @@ for file in *; do
         echo "Renamed '$file' to '$new_name'"
     fi
 done
-
