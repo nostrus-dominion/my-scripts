@@ -6,18 +6,24 @@
 #Copyright: (c) 2023
 #Dependancy: ffmpeg, ffprobe
 
-# Global Variables for ANSI color
-brown='\033[0;33m'
-red='\033[0;31m'
-yellow='\033[0;32m'
-reset='\033[0m'
+# CONSTANTS
+
+# Variables for ANSI color
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+red=$(tput setaf 1)
+blue=$(tput setaf 4)
+purple=$(tput setaf 5)
+orange=$(tput setaf 166)
+cyan=$(tput setaf 6)
+reset=$(tput sgr0) # No Color
 
 #Checking if dependancies are installed
 deps=("ffmpeg" "ffprobe")
 
 for dep in "${deps[@]}"; do
   if ! which "$dep" > /dev/null; then
-    echo "${red}CRITCAL ERROR!!: $dep is not installed or not in the PATH${reset}"
+    echo "${red}CRITCAL ERROR!!${reset} $dep is not installed or not in the PATH$"
     exit 1
   fi
 done
@@ -38,7 +44,7 @@ function validate_directory {
 # Function to validate filenames and make changes as needed
 function check_filenames {
     local invalid_files=0
-	
+
     echo -e "Checking for unsupported filenames..."
 	echo -e ""
 	sleep 4
@@ -56,9 +62,9 @@ function check_filenames {
         echo -e "All filenames are valid!"
 		echo -e ""
     fi
-	
+
 	sleep 1
-	
+
     echo -e "Checking for unsupported filenames DONE!"
 }
 
@@ -109,7 +115,7 @@ function validate_files {
         if [[ -z "$codec" ]]; then
             codec="$file_codec"
         fi
-		
+
         # Compare codec with previous files
         if [[ "$file_codec" != "$codec" ]]; then
             echo -e ""
@@ -130,6 +136,8 @@ function validate_files {
     echo -e "All files codecs have been validated!!"
 	sleep 1
 }
+
+
 
 ## SCRIPT BEGINNING
 

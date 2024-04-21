@@ -7,9 +7,9 @@
 ## ALL THE BORING STUFF
 
 # Global Color Variables
-brown='\033[0;33m'
-red='\033[0;31m'
-reset='\033[0m'
+red=$(tput setaf 1)
+orange=$(tput setaf 166)
+reset=$(tput sgr0) # No Color
 
 #
 ## BEGINNING OF SCRIPT
@@ -17,25 +17,9 @@ reset='\033[0m'
 
 while true; do
     # Prompt the user for file name pattern
-    echo -e -n "Enter file name pattern (or ${brown}'exit'${reset} to quit, or ${brown}'clear'${reset} to clean screen): "
+    echo ""
+    echo -e -n "Enter string pattern you wish to find: "
     read pattern
-
-    # Check user input
-    if [ "$pattern" == "clear" ]; then
-        clear
-        echo "Cleared screen. Enter file name pattern (or 'exit' to quit): "
-        continue
-    fi
-
-    if [ "$pattern" == "exit" ]; then
-        echo "Exiting the script. Goodbye!"
-        exit 0
-    fi
-
-    if [ -z "$pattern" ]; then
-        echo -e "${red}ERROR!${reset} Input cannot be empty. Please try again."
-        continue
-    fi
 
     # Use find command to search for files matching the pattern in the current directory
     matching_files=$(find ./ -type f -iname "*$pattern*")
@@ -63,11 +47,13 @@ while true; do
     echo -e ""
 
     # Prompt user to save results to a text file
-    read -p "Do you want to save the results to a text file? (yes/no): " save_to_file
+    read -p "Do you want to save the results to a text file? (y/N): " save_to_file
 
-    if [ "$save_to_file" == "yes" ]; then
+    # Check if input contains 'y', then proceed
+    save_to_file=$(echo "$save_to_file" | tr '[:upper:]' '[:lower:]')
+    if [[ "$save_to_file" == *"y"* ]]; then
         # Prompt user for the filename
-        read -p "Enter the filename (without extension): " filename
+        read -rp "Enter the filename (without extension): " filename
 
         # Add suffix if file already exists
         counter=1
@@ -84,4 +70,23 @@ while true; do
         echo "Results saved to: $HOME/$filename.txt"
     fi
 
+    # Prompt user if they wish to exit the script or clear the screen
+    echo -e "Would you like to (${orange}'quit'${reset} to quit, or ${orange}'clear'${reset} to clean screen and look again?"
+    read choice
+    # Check user input
+    if [ "$choice" == "clear" ]; then
+        clear
+        echo "Cleared screen."
+        continue
+    fi
+
+    if [ "$choice" == "quit" ]; then
+        echo "Exiting the script. Goodbye!"
+        exit 0
+    fi
+
+    if [ -z "$choice" ]; then
+        echo -e "${red}ERROR!${reset} Input cannot be empty. Please try again."
+        continue
+    fi
 done

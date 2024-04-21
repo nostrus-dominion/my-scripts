@@ -7,20 +7,19 @@
 ## ALL THE BORING STUFF
 
 # Global color variables
-brown='\033[0;33m'
-red='\033[0;31m'
-reset='\033[0m'
+red=$(tput setaf 1)
+orange=$(tput setaf 166)
+reset=$(tput sgr0) # No Color
 
 # Script Splash
-echo -e "${brown}"
-echo -e "-----------------------------------------"
-echo -e "|    File Extension Converter Script    |"
-echo -e "-----------------------------------------"
-echo -e "This script finds files in a specified   "
-echo -e "directory and its subdirectories, and    "
-echo -e "converts their extensions to lowercase.  "
-echo -e "-----------------------------------------"
-echo -e "${reset}"
+echo -e "${orange}"
+echo -e " ---------------------------------------- "
+echo -e "|    File Extension Converter Script     |"
+echo -e " ---------------------------------------- "
+echo -e "| This script finds files in a specified |"
+echo -e "| directory and its subdirectories, and  |"
+echo -e "| converts the extensions to lowercase.  |"
+echo -e " ----------------------------------------"${reset}
 
 # Ask the user if they want to use the current directory
 read -p "Do you want to use the current directory to check for duplicate files? ([Y]es, [N]o, [Q]uit): " choice

@@ -8,10 +8,10 @@
 ## ALL THE BORING STUFF
 
 # Global variables for ANSI color
-red='\033[1;31m'
-green='\033[1;32m'
-yellow='\033[1;33m'
-reset='\033[0m'
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+red=$(tput setaf 1)
+reset=$(tput sgr0) # No Color
 
 # Script splash
 
