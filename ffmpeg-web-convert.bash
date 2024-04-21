@@ -6,11 +6,14 @@
 ## Dependencies: FFmpeg, FFprobe
 
 # Color variables
-red='\033[0;31m'
-green='\033[0;32m'
-yellow='\033[0;33m'
-cyan='\033[0;36m'
-reset='\033[0m' # No Color
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+red=$(tput setaf 1)
+blue=$(tput setaf 4)
+purple=$(tput setaf 5)
+orange=$(tput setaf 166)
+cyan=$(tput setaf 6)
+reset=$(tput sgr0) # No Color
 
 # Checking if dependencies are installed
 dependencies=("ffmpeg" "ffprobe")

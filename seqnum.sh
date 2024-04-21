@@ -7,14 +7,15 @@
 ## ALL THE BORING STUFF
 
 # Global Varibales for ANSI colors
-brown='\033[0;33m'
-red='\033[0;31m'
-reset='\033[0m'
+orange=$(tput setaf 166)
+red=$(tput setaf 1)
+reset=$(tput sgr0) # No Color
 
 # Script Splash
-echo -e "${brown}"
-echo -e "    Sequential Number Generator Script    "
-echo -e "${reset}"
+echo -e "${orange}"
+echo -e "Sequential Number Generator Script"
+echo -e ""${reset}
+
 
 ## BEGINNING OF SCRIPT
 

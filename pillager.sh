@@ -5,21 +5,15 @@
 ## Copyright: (c) 2023
 
 # Color variables
-green='\033[0;32m'
-yellow='\033[1;33m'
-red='\033[0;31m'
-blue='\033[0;34m'
-purple='\033[0;35m'
-brown='\033[0;33m'
-cyan='\033[0;36m'
-reset='\033[0m' # No Color
+red=$(tput setaf 1)
+reset=$(tput sgr0) # No Color
 
 # Checking if dependencies are installed
 dependencies=("wget")
 for cmd in "${dependencies[@]}"
 do
   if ! command -v "$cmd" > /dev/null 2>&1; then
-    echo -e "${red}  ERROR:${reset} The command ${red} '$cmd' ${reset}is not installed, quitting :(" >&2
+    echo -e "${red}ERROR!${reset} The binary ${red}'$cmd'${reset} is not installed. Quitting script. :(" >&2
     exit 1
   fi
 done
@@ -27,16 +21,16 @@ done
 # Function to initialize script variables
 initialize() {
     [[ -d $HOME/.pillager ]] || mkdir "$HOME/.pillager"
-    SAVEPATH="$PWD"
-    LIST=$HOME/.pillager/list
-    INDEX="--reject index.html,index.html*"
-    FLAGS="-r -np -nc "
-    LOG="/tmp/website-size-log"
+    savepath="$HOME/Pillager/"
+    list=$HOME/.pillager/list
+    index="--reject index.html,index.html*"
+    flags="-r -np -nc "
+    log="/tmp/website-size-log"
 }
 
 # Function to display help message
 show_help() {
-    echo "HELP"
+    echo "Oh you need help?"
     echo "By default, pillager will download all files"
     echo "recursively from a given link, avoiding index.html files,"
     echo "to the current working directory. A list of pillaged"
@@ -56,14 +50,14 @@ show_help() {
 parse_options() {
     while getopts 'ishmd:l:' flag; do
         case "${flag}" in
-            i) INDEX=" " ;;
+            i) index=" " ;;
             h) show_help ;;
-            d) SAVEPATH="${OPTARG}" ;;
-            m) FLAGS="-mkEpnp "
-               INDEX=" " ;;
-            l) LFLAG=1
-               LINK="${OPTARG}" ;;
-            s) SFLAG=1 ;;
+            d) savepath="${OPTARG}" ;;
+            m) flags="-mkEpnp "
+               index=" " ;;
+            l) lflag=1
+               link="${OPTARG}" ;;
+            s) sflag=1 ;;
             *) show_help ;;
         esac
     done
@@ -71,28 +65,29 @@ parse_options() {
 
 # Function to prompt user for link if not provided
 get_link() {
-    if [ -z "$LINK" ]; then
+    if [ -z "$link" ]; then
         echo -n "Link to pillage: "
-        read -r LINK
+        read -r link
     fi
 }
 
 # Function to estimate website size
 estimate_size() {
     echo "Crawling site..."
-    wget -rSnd -np -l inf --spider -o "$LOG" "${LINK}"
+    wget -rSnd -np -l inf --spider -o "$log" "${link}"
     echo "Finished crawling."
     sleep 1s
-    echo "Estimated size: $(grep -e "Content-Length" "$LOG" | \
+    echo "Estimated size: $(grep -e "Content-Length" "$log" | \
         awk '{sum+=$2} END {printf("%.0f", sum / 1024 / 1024)}'\
     ) Mb"
-    rm "$LOG"
+    rm "$log"
 }
 
 # Function to download files
 download_files() {
-    echo "$LINK" >> "$LIST"
-    wget $FLAGS -e robots=off -c $INDEX "${LINK}" -P "$SAVEPATH"
+    echo "$link" >> "$list"
+    echo "Downloading files..."
+    wget $flags -e robots=off -c $index "${link}" -P "$savepath" /dev/null 2>&1
 }
 
 # Main function
@@ -102,7 +97,7 @@ main() {
     get_link           # Prompt user for link if not provided
 
     # Perform actions based on options
-    if [ -v "$SFLAG" ]; then
+    if [ -v "$sflag" ]; then
         estimate_size   # Estimate website size
     else
         download_files  # Download files

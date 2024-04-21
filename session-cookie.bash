@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script is for MAM session
+# cookies to be replaced on our system
+
 read -p "Enter the session string: " session_string
 
 output=$(curl -s -c /path/docker/persists/mam.cookies -b "mam_id=$session_string" https://t.myanonamouse.net/json/dynamicSeedbox.php)
