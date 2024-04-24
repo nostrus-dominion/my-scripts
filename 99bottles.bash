@@ -8,6 +8,8 @@ typeset -i n=99
 typeset bottles=bottles
 typeset no
 
+trap '' SIGINT
+
 while [ 0 != $[ n ] ]
 do
    echo "${n?} ${bottles?} of beer on the wall,"
