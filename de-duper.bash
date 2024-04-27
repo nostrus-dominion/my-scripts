@@ -42,7 +42,7 @@ validate_directory() {
 # Function to confirm user wants to proceed after file count
 confirm_proceed() {
     echo -e
-    read -p "Do you want to proceed with finding duplicate files? ([Y]es, any other key for no): " proceed
+    read -rp "Do you want to proceed with finding duplicate files? ([Y]es, any other key for no): " proceed
     proceed=$(echo "$proceed" | tr '[:upper:]' '[:lower:]')
     if [[ "$proceed" != "yes" && "$proceed" != "y" ]]; then
         echo "Aborted by user. Exiting script."
@@ -55,7 +55,7 @@ get_num_threads() {
     local available_threads=$(nproc)
     echo ""
     echo -e "Number of available threads on this system: ${red}$available_threads${reset}"
-    read -p "Enter the number of threads for parallel processing (default is 1, maximum is $available_threads): " num_threads
+    read -rp "Enter the number of threads for parallel processing (default is 1, maximum is $available_threads): " num_threads
     num_threads=${num_threads:-1}
 
     if [[ ! "$num_threads" =~ ^[1-9][0-9]*$ || "$num_threads" -gt "$available_threads" ]]; then
@@ -80,12 +80,12 @@ echo -e "${reset}"
 
 # Ask the user if they want to use the current directory
 echo
-read -p "Do you want to use the current directory to check for duplicate files? ([Y]es, [N]o, [Q]uit): " choice
+read -rp "Do you want to use the current directory to check for duplicate files? ([Y]es, [N]o, [Q]uit): " choice
 choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
 
 case "$choice" in
     y) directory=$(pwd) ;;
-    n) read -p "Enter the directory path to search for duplicate files: " directory ;;
+    n) read -rp "Enter the directory path to search for duplicate files: " directory ;;
     q) echo "Exiting script. Goodbye!"
        exit 0 ;;
     *) echo "Invalid choice! EXITING SCRIPT!"
@@ -95,7 +95,7 @@ esac
 # Call the validate_directory fucntion to verify the provided directory
 validate_directory "$directory"
 echo
-echo -e "Searching for duplicate files the following directory: "$directory
+echo -e "Searching for duplicate files the following directory: " "$directory"
 
 # Count the number of files in the directory
 num_files=$(find "$directory" -type f | wc -l)
@@ -125,6 +125,9 @@ uniq -Dw32)
 # Create duplicate-files.txt with timestamp for individual runs
 timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 
+# ...
+
+# Check if there are duplicate files
 if [[ -z "$duplicate_files" ]]; then
     echo ""
     echo "No duplicate files found!"
@@ -132,10 +135,51 @@ if [[ -z "$duplicate_files" ]]; then
     echo ""
     exit 0
 else
-    # Save duplicate files to 'duplicate-files.txt' in the user's home directory
+    # Display the number of duplicate files
+    num_duplicate_files=$(echo "$duplicate_files" | wc -l)
     echo ""
-    echo "$duplicate_files" > "$HOME/duplicate-files-$timestamp.txt"
-    echo "Duplicate files found. Results saved to $HOME/duplicate-files-$timestamp.txt"
+    echo -e "Number of duplicate files found: ${red}$num_duplicate_files${reset}"
+    echo ""
+
+    # Ask the user how they want to handle the duplicates
+    echo "Choose an option:"
+    echo "  a) Save duplicate file names to a text file"
+    echo "  b) Delete duplicate files (keeping the original files)"
+    read -rp "Enter your choice (a/b): " user_choice
+
+    case "$user_choice" in
+        a)
+            # Save duplicate files to a file with a unique suffix
+            echo ""
+            echo "$duplicate_files" > "$HOME/duplicate-files-$timestamp.txt"
+            echo "Duplicate files found. Results saved to $HOME/duplicate-files-$timestamp.txt"
+            echo "Exiting script! Goodbye!"
+            echo ""
+            ;;
+
+        b)
+            # Process the list of duplicate files and keep only the first occurrence of each checksum
+            unique_checksums=$(echo "$duplicate_files" | awk '!seen[$1]++ {print $1}')
+
+            # Loop through the unique checksums and delete the duplicates while keeping the first occurrence
+            while read -r checksum; do
+                # Keep the first occurrence and delete the rest
+                first_file=$(grep "$checksum" <<< "$duplicate_files" | head -n 1 | awk '{print $2}')
+                grep -v "$first_file" <<< "$duplicate_files" | cut -d' ' -f2- | xargs -0 rm "$duplicate_files"
+            done <<< "$unique_checksums"
+
+            echo "Duplicate files deleted. Original files are kept."
+            echo "Exiting script! Goodbye!"
+            echo ""
+            exit 0
+            ;;
+
+        *)
+            echo "Invalid choice. Exiting script."
+            exit 1
+            ;;
+    esac
+
     echo "Exiting script! Goodbye!"
     echo ""
     exit 0
