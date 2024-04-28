@@ -9,10 +9,7 @@
 green=$(tput setaf 2)
 yellow=$(tput setaf 3)
 red=$(tput setaf 1)
-blue=$(tput setaf 4)
-purple=$(tput setaf 5)
 orange=$(tput setaf 166)
-cyan=$(tput setaf 6)
 reset=$(tput sgr0) # No Color
 
 # Checking if dependencies are installed
@@ -26,7 +23,7 @@ do
 done
 
 # Script splash
-echo -e "${brown}"
+echo -e "${orange}"
 echo -e "   ******************************    "
 echo -e "   *                            *    "
 echo -e "   *   File Converter for Web   *    "
@@ -43,7 +40,7 @@ echo -e "${reset}"
 read -r -p "Enter the directory path: " directory
 if [ ! -d "$directory" ]
 then
-  echo -e "${red}Invalid directory path.${reset} Please enter a valid directory path and try again."
+  echo -e "${red}ERROR!${reset}Invalid directory path. Please enter a valid directory path and try again."
   exit 1
 fi
 
@@ -51,42 +48,47 @@ read -r -p "Are you sure you wish to continue? (y/n) " confirm
 
 valid_extensions=(".mp4" ".mkv" ".avi" ".flv" ".wmv" ".mov" ".mpg" ".mpeg" ".m4v" ".webm" ".ogg" ".3gp" ".3g2" ".mj2")
 
-if [ "$confirm" == "y" ]
-then
-  for file in $(find "$directory" -type f); do
+if [ "$confirm" == "y" ]; then
+find "$directory" -type f | while IFS= read -r file; do
     filename=$(basename "$file")
     extension="${filename##*.}"
-    if [[  ${valid_extensions[*]}  =~  ${extension}  ]]; then
+    if [[ "${valid_extensions[*]}" =~ $extension ]]; then
       video_codec=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=nw=1 "$file")
       audio_codec=$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of default=nw=1 "$file")
-      if [ "$video_codec" == "h264" ] && [ "$audio_codec" == "aac" ]
-      then
+      if [ "$video_codec" == "h264" ] && [ "$audio_codec" == "aac" ]; then
         echo -e "${yellow}Skipping $file as it already has the desired codecs.${reset}"
         sleep 2
         continue
       fi
-      if [ "$video_codec" != "h264" ]
-      then
-        if [ "$audio_codec" == "aac" ]
-        then
+      if [ "$video_codec" != "h264" ]; then
+        if [ "$audio_codec" == "aac" ]; then
           filename="${filename%.*}"
-          ffmpeg -i "$file" -c:v h264 -c:a copy -y "$directory/$filename-h264.$extension"
+          if ffmpeg -i "$file" -c:v h264 -c:a copy -y "$directory/$filename-websafe.$extension" </dev/null; then
+            echo -e "${green}SUCCESS!${reset} Conversion successful for $filename "
+          else
+            echo -e "${red}ERROR!${reset} CONVERSION FAILED! $filename was not successful."
+          fi
         else
           filename="${filename%.*}"
-          ffmpeg -i "$file" -c:v h264 -c:a aac -y "$directory/$filename-h264-aac.$extension"
+          if ffmpeg -i "$file" -c:v h264 -c:a aac -y "$directory/$filename-websafe.$extension" </dev/null; then
+          echo -e "${green}SUCCESS!${reset} Conversion successful for $filename "
+          else
+            echo -e "${red}ERROR!${reset} CONVERSION FAILED! $filename was not successful."
+          fi
         fi
       else
-        if [ "$audio_codec" != "aac" ]
-        then
+        if [ "$audio_codec" != "aac" ]; then
           filename="${filename%.*}"
-          ffmpeg -i "$file" -c:v copy -c:a aac -y "$directory/$filename-aac.$extension"
+          if ffmpeg -i "$file" -c:v copy -c:a aac -y "$directory/$filename-websafe.$extension" </dev/null; then
+          echo -e "${green}SUCCESS!${reset} Conversion successful for $filename "
+          else
+            echo -e "${red}ERROR!${reset} CONVERSION FAILED! $filename was not successful."
+          fi
         fi
       fi
     fi
- done
- echo "Conversions complete!"
- else
- echo "All done!"
+  done
+  echo "All conversions have been completed!"
+else
+  echo "EXITING SCRIPT!"
 fi
-
-## Changing commit for git test

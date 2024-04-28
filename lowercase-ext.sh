@@ -19,15 +19,16 @@ echo -e " ---------------------------------------- "
 echo -e "| This script finds files in a specified |"
 echo -e "| directory and its subdirectories, and  |"
 echo -e "| converts the extensions to lowercase.  |"
-echo -e " ----------------------------------------"${reset}
+echo -e " ----------------------------------------"
+echo -e "${reset}"
 
 # Ask the user if they want to use the current directory
-read -p "Do you want to use the current directory to check for duplicate files? ([Y]es, [N]o, [Q]uit): " choice
+read -rp "Do you want to use the current directory to check for duplicate files? ([Y]es, [N]o, [Q]uit): " choice
 choice=$(echo "$choice" | tr '[:upper:]' '[:lower:]')
 
 case "$choice" in
     y) directory=$(pwd) ;;
-    n) read -p "Enter the directory path to search for duplicate files: " directory ;;
+    n) read -rp "Enter the directory path to search for duplicate files: " directory ;;
     q) echo -e "Exiting script. Goodbye!"
        exit 0 ;;
     *) echo -e "${red}Invalid choice! EXITING SCRIPT!${reset}"
