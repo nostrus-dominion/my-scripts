@@ -12,10 +12,7 @@
 # brown='\033[0;33m'
 # red='\033[0;31m'
 # reset='\033[0m'
-green=$(tput setaf 2)
-yellow=$(tput setaf 3)
 red=$(tput setaf 1)
-cyan=$(tput setaf 6)
 brown=$(tput setaf 166)
 reset=$(tput sgr0)
 

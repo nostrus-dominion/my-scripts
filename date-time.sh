@@ -41,7 +41,7 @@ echo "    A script to update creation dates of files and directories.   "
 echo
 echo "Current directory: $(pwd)"
 echo
-read -p "Do you wish to continue? (y/N): " dir_confirm
+read -rp "Do you wish to continue? (y/N): " dir_confirm
 
 if [ "${dir_confirm,,}" != "yes" ] && [ "${dir_confirm,,}" != "y" ]; then
   echo
@@ -53,7 +53,7 @@ cd "$directory" || exit 1
 
 # Sanitize input for the target date and time
 echo
-read -p "Enter the desired date and time (YYYY-MM-DD HH:MM:SS): " target_datetime
+read -rp "Enter the desired date and time (YYYY-MM-DD HH:MM:SS): " target_datetime
 
 # Validate the date and time format
 if ! date -d "$target_datetime" >/dev/null; then
@@ -73,10 +73,7 @@ printf "["
 for ((i=0; i<50; i++)); do printf " "; done
 printf "]"
 
-# Set up variables for progress bar
-current_item=0
-progress=0
-increment=$((100 / total_items))
+# Set up variables
 error_occurred=false
 
 # Iterate over items and change their creation date

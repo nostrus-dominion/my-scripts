@@ -31,18 +31,18 @@ done
 ## FUNCTIONS
 
 # Function to validate if the provided path is a directory
-function validate_directory {
+function validateDirectory {
     local dir=$1
     if [ ! -d "$dir" ]; then
 	echo
-        echo -e "Error: The provided path is not a directory."
+        echo -e "${red}ERROR!${reset} The provided path is not a directory."
 		echo
         return 1
     fi
 }
 
 # Function to validate filenames and make changes as needed
-function check_filenames {
+function checkFilenames {
     local invalid_files=0
 
     echo -e "Checking for unsupported filenames..."
@@ -54,7 +54,7 @@ function check_filenames {
             new_file=$(echo "$f" | tr -d "'")
             mv "$f" "$new_file"
             invalid_files=1
-            echo "Invalid filename found: '$f' has been corrected to '$new_file'"
+            echo "${yellow}WARNING!${reset} Invalid filename found: '$f' has been corrected."
         fi
     done
 
@@ -69,7 +69,7 @@ function check_filenames {
 }
 
 # Function to confirm user wants to proceed after file count
-function confirm_proceed {
+function confirmProceed {
     echo -e
     read -p "Proceed with merging all .$file_extensions files into $new_output.$file_extensions file? ([Y]es, any other key for no): " proceed
     proceed=$(echo "$proceed" | tr '[:upper:]' '[:lower:]')
@@ -80,7 +80,7 @@ function confirm_proceed {
 }
 
 # Function to display a progress bar
-function show_progress {
+function showProgress {
     local percentage=$1
     local width=50
     local completed=$((percentage * width / 100))
@@ -97,7 +97,7 @@ function show_progress {
 }
 
 # Function to validate codec of all files using ffprobe
-function validate_files {
+function validateFiles {
     echo -e ""
 	echo "Validating file codecs..."
 	local total_files
@@ -142,7 +142,7 @@ function validate_files {
 ## SCRIPT BEGINNING
 
 # Script splash
-echo -e "${brown}"
+echo -e "${orange}"
 echo -e "                                   Welcome to FFMERGE SCRIPT                                       "
 echo -e "                   This script will merge multiple media files into one file.                      "
 echo -e ""
@@ -171,7 +171,7 @@ while true; do
             break ;;  # Break the loop if the user chooses the current directory
         n) read -p "Enter the directory path to merge media files: " directory
             # Calls the validate_directory function and continue the loop if it's invalid
-            if validate_directory "$directory"; then
+            if validateDirectory "$directory"; then
                 break
             fi ;;
         q) echo "Exiting script. Goodbye!"
@@ -220,13 +220,13 @@ done
 
 # Call the check filesnames Function
 echo
-check_filenames
+checkFilenames
 
 # Call confirm_proceed Function
-confirm_proceed
+confirmProceed
 
 # Call the validate_files function
-validate_files
+validateFiles
 
 # Creation of concat list and running ffmpeg to merge files
 echo -e "Attempting to combine files..."

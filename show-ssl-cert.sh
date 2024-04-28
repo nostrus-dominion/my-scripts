@@ -37,14 +37,9 @@
 #
 
 # Color variables
-green='\033[0;32m'
-yellow='\033[1;33m'
-red='\033[0;31m'
-blue='\033[0;34m'
-purple='\033[0;35m'
-brown='\033[0;33m'
-cyan='\033[0;36m'
-reset='\033[0m' # No Color
+yellow=$(tput setaf 3)
+red=$(tput setaf 1)
+reset=$(tput sgr0) # No Color
 
 #Checking if dependancies are installed
 deps=("openssl")
@@ -62,7 +57,8 @@ done
 
 # Check if the script is called without a URL
 if [ "$#" -lt 1 ]; then
-    echo -e "${purple}Hey ${blue}dumbass! ${brown}You ${cyan}need ${reset}a ${red}URL ${yellow}to ${green}run ${purple}this ${blue}script!${reset}"
+    echo -e "${red}ERROR!${reset} A valid URL is required to run this script."
+    echo -e "USAGE: ./show-ssl-cert.sh [URL]"
     exit 1
 fi
 

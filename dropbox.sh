@@ -26,7 +26,7 @@ fi
 # Download directory
 downdir="$homedir/Dropbox Links"
 mkdir -p "$downdir"
-cd "$downdir"
+cd "$downdir" || return
 
 echo "Creating download.zip file to not mangle files..."
 sleep 1

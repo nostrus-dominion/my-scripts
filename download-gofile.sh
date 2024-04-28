@@ -21,7 +21,7 @@ homedir="$HOME"
 function promptForURL() {
     local url="$1"
     until [ -n "$url" ]; do
-        read -p "URL: " url
+        read -rp "URL: " url
     done
     id=$(sed 's|.*gofile.io/d/||g' <<< "$url")
     echo
@@ -93,7 +93,7 @@ function retrieveContent() {
 function handlePassword() {
     printf "\r\033[K"
     echo "This content is password protected..."
-    read -sp "Please enter the password: " password
+    read -rsp "Please enter the password: " password
     echo
     password_hash=$(printf "%s" "$password" | sha256sum | cut -d' ' -f1)
     retrieveContent "$password_hash"
@@ -122,9 +122,9 @@ function format_size {
     local -i bytes=$1
 
     if [ $bytes -lt 1000000000 ]; then
-        echo $(awk "BEGIN {printf \"%.2f\", $bytes/1000000}")" MB"
+        echo "$(awk "BEGIN {printf \"%.2f\", $bytes/1000000}")"" MB"
     else
-        echo $(awk "BEGIN {printf \"%.2f\", $bytes/1000000000}")" GB"
+        echo "$(awk "BEGIN {printf \"%.2f\", $bytes/1000000000}")"" GB"
     fi
 }
 

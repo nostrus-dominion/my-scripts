@@ -19,7 +19,7 @@ while true; do
     # Prompt the user for file name pattern
     echo ""
     echo -e -n "Enter string pattern you wish to find: "
-    read pattern
+    read -r pattern
 
     # Use find command to search for files matching the pattern in the current directory
     matching_files=$(find ./ -type f -iname "*$pattern*")
@@ -47,7 +47,7 @@ while true; do
     echo -e ""
 
     # Prompt user to save results to a text file
-    read -p "Do you want to save the results to a text file? (y/N): " save_to_file
+    read -rp "Do you want to save the results to a text file? (y/N): " save_to_file
 
     # Check if input contains 'y', then proceed
     save_to_file=$(echo "$save_to_file" | tr '[:upper:]' '[:lower:]')
@@ -72,7 +72,7 @@ while true; do
 
     # Prompt user if they wish to exit the script or clear the screen
     echo -e "Would you like to (${orange}'quit'${reset} to quit, or ${orange}'clear'${reset} to clean screen and look again?"
-    read choice
+    read -r choice
     # Check user input
     if [ "$choice" == "clear" ]; then
         clear

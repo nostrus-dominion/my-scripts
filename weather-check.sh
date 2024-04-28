@@ -1,21 +1,22 @@
 #!/bin/bash
 
 # Global color variables
-brown='\033[0;33m'
-reset='\033[0m'
+red=$(tput setaf 1)
+orange=$(tput setaf 166)
+reset=$(tput sgr0) # No Color
 
 # Checking if dependancies are installed
 deps=("jq" "curl")
 
 for dep in "${deps[@]}"; do
 if ! which "$dep" > /dev/null; then
-    echo "${red}CRITCAL ERROR!!: $dep is not installed or not in the PATH${reset}"
+    echo -e "${red}CRITCAL ERROR!! $dep is not installed or not in the PATH${reset}"
     exit 1
 fi
 done
 
 # Splash screen
-echo -e "${brown}"
+echo -e "${orange}"
 echo -e "---------------------------------------"
 echo -e "|        Weather Check Script        |"
 echo -e "---------------------------------------"
@@ -31,7 +32,7 @@ detect_location() {
 
 # Function to get user input for location
 get_user_input() {
-    read -p "Enter the location zip code (or press Enter to use current location): " user_input
+    read -rp "Enter the location zip code (or press Enter to use current location): " user_input
     if [ -n "$user_input" ]; then
         location="$user_input"
     fi
@@ -42,7 +43,7 @@ detect_location
 
 # Ask user if they want to use the current location or enter another location
 echo "Your approximate location is: $location"
-read -p "Use this location? (Y/n): " choice
+read -rp "Use this location? (Y/n): " choice
 if [[ "$choice" != "n" && "$choice" != "N" ]]; then
     # Use current location
     weather_info=$(curl -s https://wttr.in/"$zip_code"?format="%t+%w+%h")
