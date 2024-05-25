@@ -5,5 +5,7 @@
 ## Copyright: (c) 2023
 
 for f in /etc/update-motd.d/* ; do
-    [ -x "$f" ] && sudo bash "$f"
+    if [ -x "$f" ]; then
+        bash "$f"
+    fi
 done
