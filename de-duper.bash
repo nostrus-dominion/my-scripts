@@ -9,9 +9,6 @@
 ## ALL THE BORING STUFF
 
 # Global Variables for ANSI color
-# brown='\033[0;33m'
-# red='\033[0;31m'
-# reset='\033[0m'
 red=$(tput setaf 1)
 brown=$(tput setaf 166)
 reset=$(tput sgr0)
@@ -20,7 +17,7 @@ reset=$(tput sgr0)
 deps=("parallel" "find" "md5sum")
 for dep in "${deps[@]}"; do
 if ! which "$dep" > /dev/null; then
-    echo -e "${red}CRITCAL ERROR!!: $dep is not installed or not in the PATH${reset}"
+    echo -e "${red}CRITCAL ERROR!! $dep is not installed or not in the PATH${reset}"
     exit 1
 fi
 done
@@ -124,6 +121,8 @@ timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 
 # ...
 
+#!/bin/bash
+
 # Check if there are duplicate files
 if [[ -z "$duplicate_files" ]]; then
     echo ""
@@ -138,46 +137,47 @@ else
     echo -e "Number of duplicate files found: ${red}$num_duplicate_files${reset}"
     echo ""
 
-    # Ask the user how they want to handle the duplicates
-    echo "Choose an option:"
-    echo "  a) Save duplicate file names to a text file"
-    echo "  b) Delete duplicate files (keeping the original files)"
-    read -rp "Enter your choice (a/b): " user_choice
+    while true; do
+        # Ask the user how they want to handle the duplicates
+        echo "Choose an option:"
+        echo "  a) Save duplicate file names to a text file"
+        echo "  b) Delete duplicate files (keeping the original files)"
+        read -rp "Enter your choice (a/b): " user_choice
 
-    case "$user_choice" in
-        a)
-            # Save duplicate files to a file with a unique suffix
-            echo ""
-            echo "$duplicate_files" > "$HOME/duplicate-files-$timestamp.txt"
-            echo "Duplicate files found. Results saved to $HOME/duplicate-files-$timestamp.txt"
-            echo "Exiting script! Goodbye!"
-            echo ""
-            ;;
+        case "$user_choice" in
+            a)
+                # Save duplicate files to a file with a unique suffix
+                echo ""
+                echo "$duplicate_files" > "$HOME/duplicate-files-$(date +%Y%m%d%H%M%S).txt"
+                echo "Duplicate files results saved to $HOME/duplicate-files-$(date +%Y%m%d%H%M%S).txt"
+                echo ""
+                echo "Exiting script! Goodbye!"
+                echo ""
+                exit 0
+                ;;
 
-        b)
-            # Process the list of duplicate files and keep only the first occurrence of each checksum
-            unique_checksums=$(echo "$duplicate_files" | awk '!seen[$1]++ {print $1}')
+            b)
+                # Process the list of duplicate files and keep only the first occurrence of each checksum
+                unique_checksums=$(echo "$duplicate_files" | awk '!seen[$1]++ {print $1}')
 
-            # Loop through the unique checksums and delete the duplicates while keeping the first occurrence
-            while read -r checksum; do
-                # Keep the first occurrence and delete the rest
-                first_file=$(grep "$checksum" <<< "$duplicate_files" | head -n 1 | awk '{print $2}')
-                grep -v "$first_file" <<< "$duplicate_files" | cut -d' ' -f2- | xargs -0 rm "$duplicate_files"
-            done <<< "$unique_checksums"
+                # Loop through the unique checksums and delete the duplicates while keeping the first occurrence
+                while read -r checksum; do
+                    # Keep the first occurrence and delete the rest
+                    first_file=$(grep "$checksum" <<< "$duplicate_files" | head -n 1 | awk '{print $2}')
+                    grep -v "$first_file" <<< "$duplicate_files" | cut -d' ' -f2- | xargs -0 rm
+                done <<< "$unique_checksums"
 
-            echo "Duplicate files deleted. Original files are kept."
-            echo "Exiting script! Goodbye!"
-            echo ""
-            exit 0
-            ;;
+                echo "Duplicate files deleted. Original files are kept."
+                echo ""
+                echo "Exiting script! Goodbye!"
+                echo ""
+                exit 0
+                ;;
 
-        *)
-            echo "Invalid choice. Exiting script."
-            exit 1
-            ;;
-    esac
-
-    echo "Exiting script! Goodbye!"
-    echo ""
-    exit 0
+            *)
+                echo "${red}Invalid choice.${reset} Please enter a or b."
+                echo ""
+                ;;
+        esac
+    done
 fi
