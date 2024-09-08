@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Version 0.2
+## Version 0.2
+## License: Open Source GPL
+## Copyright: (c) 2023
 
 # Check if the script is run as root
 if [ "$EUID" -ne 0 ]; then
