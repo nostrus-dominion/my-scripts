@@ -10,7 +10,7 @@ reset=$(tput sgr0) # No Color
 
 # Check if the rename command exists
 if ! command -v rename &> /dev/null; then
-    echo -e "${red}ERROR!${reset} The rename linux utility is not found. Please install it."
+    echo -e "${red}ERROR!${reset} The 'rename' linux utility is not found. Please install it."
     exit 1
 fi
 

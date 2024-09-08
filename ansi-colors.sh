@@ -10,6 +10,7 @@
 #    V0.2, 30 Oct 2009, Support dash
 #    V0.4, 17 May 2011
 #      http://github.com/pixelb/scripts/commits/master/scripts/ansi_colours.sh
+# Forked by Paul Musselman
 
 e="\033["
 vline=$(tput smacs 2>/dev/null; printf 'x'; tput rmacs 2>/dev/null)

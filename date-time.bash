@@ -1,10 +1,9 @@
 #!/bin/bash
 
-# Version History
-# Version 0.1 - edit date/time of files and directory recursively
-# Version 0.2 - added directory validation, date/time validation
-# Version 0.3 - added percentage counter, added any items that failed to change
-# Version 0.4 - added colors, modified script usage
+## Version 0.4
+## License: Open Source GPL
+## Copyright: (c) 2023
+## Dependancy: parallel
 
 # Colors
 red=$(tput setaf 1)

@@ -1,3 +1,9 @@
+#!/bin/bash
+
+## Version 0.1
+## License: Open Source GPL
+## Copyright: (c) 2023
+
 # Color variables
 green=$(tput setaf 2)
 yellow=$(tput setaf 3)

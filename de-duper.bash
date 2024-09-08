@@ -4,7 +4,6 @@
 ## V1 Created 2021-02-07
 ## License: Open Source GPL
 ## Copyright: (c) 2023
-## Dependancy: parallel
 
 ## ALL THE BORING STUFF
 
@@ -13,7 +12,7 @@ red=$(tput setaf 1)
 brown=$(tput setaf 166)
 reset=$(tput sgr0)
 
-#Checking if dependancies are installed
+# Checking if dependancies are installed
 deps=("parallel" "find" "md5sum")
 for dep in "${deps[@]}"; do
 if ! which "$dep" > /dev/null; then
