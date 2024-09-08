@@ -292,10 +292,6 @@ function processFiles() {
     done < <(jq -r '.data.children[] | "\(.name)|\(.size)|\(.link)|\(.md5)"' <<< "$resp" | sort -t "|" -k1,1)
 }
 
-
-
-
-
 #Main
 
 # Initiates the script by prompting the user for a URL if not supplied as an argument.
