@@ -1,16 +1,16 @@
 #!/bin/bash
 
 ############
-### Version 0.1
+### Version 0.5
 ### License: Open Source GPL
-### Copyright: (c) 2023
+### Copyright: (c) 2024
 ############
-### ORIGINAL AUTHOR
+### BASED ON THE FOLLOWING SCRIPT:
 ### James Morris
 ### https://github.com/JRMorris77/system_maintenance/blob/main/system_maintenance.sh
 ############
 
-# Checks and constants
+### CHECKS AND CONSTANTS
 
 # Color variables
 green=$(tput setaf 2)
@@ -29,6 +29,14 @@ if [ "$EUID" -ne 0 ]; then
     echo
     exit 1
 fi
+
+# Log file
+log_file="/var/log/system_maintenance.log"
+log() {
+    local message="$1"
+    echo -e "$(date +"%Y-%m-%d %H:%M:%S") : $message" | tee -a $log_file
+}
+exec > >(tee -a "$log_file") 2>&1 # Redirect stdout and stderr to the log file
 
 ############
 ### THIS IS WHERE THE FUN BEGINS
@@ -52,7 +60,7 @@ detect_gpu() {
         model_number=$(lspci | grep -i AMD | grep -i VGA | cut -d ' ' -f12- | head -1)
     else
         manufacturer="Unknown"
-        system_gpu="No compatible GPU found"
+        system_gpu="${yellow}No compatible GPU found${reset}"
         model_number="N/A"
     fi
 }
@@ -73,16 +81,16 @@ IFS=" " read used avail total <<<$(free -htm | grep "Mem" | awk {'print $3,$7,$2
 # get swap usage
 IFS=" " read swap_used swap_total <<<$(free -htm | grep "Swap" | awk {'print $3,$2'})
 
-echo -e "$reset  Hostname....: $green$(hostname)
-$reset  Distro......: $reset$(cat /etc/*release | grep "PRETTY_NAME" | cut -d "=" -f 2- | sed 's/"//g')
-$reset  Kernel......: $reset$(uname -sr)
-$reset  Uptime......: $reset$(uptime -p)
-$reset  CPU.........: $reset$processor_name ($green$processor_count$reset vCPU)
-$reset  GPU.........: $system_gpu $model_number
-$reset  Processes...: $reset$green$process_root$reset (root), $green$process_user$reset (user), $green$process_all$reset (total)
-$reset  Load........: $green$load1$reset (1m), $green$load5$reset (5m), $green$load15$reset (15m)
-$reset  RAM.USAGE...: $green$used$reset used, $green$avail$reset avail, $green$total$reset
-$reset  SWAP.USAGE..: $green$swap_used$reset used, $green$swap_total$reset total"
+echo -e "${reset}  Hostname....: ${green}$(hostname)
+${reset}  Distro......: ${reset}$(cat /etc/*release | grep "PRETTY_NAME" | cut -d "=" -f 2- | sed 's/"//g')
+${reset}  Kernel......: ${reset}$(uname -sr)
+${reset}  Uptime......: ${reset}$(uptime -p)
+${reset}  CPU.........: ${reset}$processor_name (${green}$processor_count${reset} vCPU)
+${reset}  GPU.........: ${reset}$system_gpu $model_number
+${reset}  Processes...: ${reset}${green}$process_root${reset} (root), ${green}$process_user${reset} (user), ${green}$process_all${reset} (total)
+${reset}  Load........: ${green}$load1${reset} (1m), ${green}$load5${reset} (5m), ${green}$load15${reset} (15m)
+${reset}  RAM.USAGE...: ${green}$used${reset} used, ${green}$avail${reset} avail, ${green}$total${reset}
+${reset}  SWAP.USAGE..: ${green}$swap_used${reset} used, ${green}$swap_total${reset} total"
 
 ### CHECKING UPDATES FROM PACAKGE MANAGERS
 echo ""
