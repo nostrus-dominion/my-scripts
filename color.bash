@@ -12,6 +12,7 @@ blue=$(tput setaf 4)
 purple=$(tput setaf 5)
 orange=$(tput setaf 166)
 cyan=$(tput setaf 6)
+dim=$(tput dim)
 reset=$(tput sgr0) # No Color
 
 
@@ -23,5 +24,6 @@ echo -e "${blue}This text is blue.${reset}"
 echo -e "${purple}This text is purple.${reset}"
 echo -e "${orange}This text is orange.${reset}"
 echo -e "${cyan}This text is cyan.${reset}"
+echo -e "${dim} This text is dimmed.${reset}"
 echo -e "${reset}This text is normal.${reset}"
 
