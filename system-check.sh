@@ -293,12 +293,21 @@ else
 fi
 
 ### RESET SWAP AREA IF THERE IS ONE
-echo "Clearing Swap Space..."
+echo "Checking for active swap space..."
 echo "========================================"
-echo "..."
-sudo swapoff -a && sudo swapon -a
-echo "========================================"
-echo "Swap Space cleared!"
+
+# Check if there is any active swap space
+if sudo swapon --show | grep -q '^'; then
+    echo "Active swap space detected."
+    echo "Clearing Swap Space..."
+    echo "========================================"
+    echo "..."
+    sudo swapoff -a && sudo swapon -a
+    echo "========================================"
+    echo -e "${red}Swap Space cleared!${reset}"
+else
+    echo "No active swap space detected."
+fi
 echo ""
 
 ### CLEAR INODES AND DENTRIES
@@ -307,7 +316,7 @@ echo "========================================"
 # Free up page cache, dentries, and inodes
 sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
 echo "========================================"
-echo "Page Cache, Dentries, & Inodes Cleared!"
+echo -e "${red}Page Cache, Dentries, & Inodes Cleared!${reset}"
 echo ""
 
 ### SYSTEM REBOOT PROMPT
