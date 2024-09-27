@@ -1,7 +1,6 @@
 #!/bin/bash
 
-## Verision 2.1
-## V1 Created 2021-02-07
+## Verision 2.5
 ## License: Open Source GPL
 ## Copyright: (c) 2023
 
@@ -9,7 +8,7 @@
 
 # Global Variables for ANSI color
 red=$(tput setaf 1)
-brown=$(tput setaf 166)
+orange=$(tput setaf 166)
 reset=$(tput sgr0)
 
 # Checking if dependancies are installed
@@ -32,22 +31,12 @@ validate_directory() {
     fi
 }
 
-# Function to confirm user wants to proceed after file count
-confirm_proceed() {
-    echo -e
-    read -rp "Do you want to proceed with finding duplicate files? ([Y]es, any other key for no): " proceed
-    proceed=$(echo "$proceed" | tr '[:upper:]' '[:lower:]')
-    if [[ "$proceed" != "yes" && "$proceed" != "y" ]]; then
-        echo "Aborted by user. Exiting script."
-        exit 0
-    fi
-}
-
 # Function to get the number of threads for parallel processing
 get_num_threads() {
     local available_threads=$(nproc)
     echo ""
     echo -e "Number of available threads on this system: ${red}$available_threads${reset}"
+    echo ""
     read -rp "Enter the number of threads for parallel processing (default is 1, maximum is $available_threads): " num_threads
     num_threads=${num_threads:-1}
 
@@ -62,7 +51,7 @@ get_num_threads() {
 ## BEGINNING OF SCRIPT
 
 # Script splash
-echo -e "${brown}"
+echo -e "${orange}"
 echo -e "                                WELCOME TO THE SUPER-DE-DUPER SCRIPT                              "
 echo -e "       ___  __  __  ____  ____  ____       ____   ____       ____   __  __  ____  ____  ____      "
 echo -e "      / __)(  )(  )(  _ \( ___)(  _ \ ___ (  _ \ ( ___) ___ (  _ \ (  )(  )(  _ \( ___)(  _ \     "
@@ -96,11 +85,9 @@ echo
 echo -e "Number of files found in the directory and all subdirectories: ${red}$num_files${reset}"
 
 if [[ "num_files" -gt 50000 ]]; then
+    echo ""
     echo -e "${red}WARNING!${reset} This operation will take a long time to complete due to large file count."
 fi
-
-# Call the function for confirmation before proceeding
-confirm_proceed
 
 # Call the function to get the number of threads
 get_num_threads
@@ -118,10 +105,6 @@ uniq -Dw32)
 # Create duplicate-files.txt with timestamp for individual runs
 timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
 
-# ...
-
-#!/bin/bash
-
 # Check if there are duplicate files
 if [[ -z "$duplicate_files" ]]; then
     echo ""
@@ -138,9 +121,9 @@ else
 
     while true; do
         # Ask the user how they want to handle the duplicates
-        echo "Choose an option:"
-        echo "  a) Save duplicate file names to a text file"
-        echo "  b) Delete duplicate files (keeping the original files)"
+        echo "Would you like to..."
+        echo "   a) Save duplicate file names to a text file..."
+        echo "   b) Delete duplicate files (keeping the oldest modified file)..."
         read -rp "Enter your choice (a/b): " user_choice
 
         case "$user_choice" in
@@ -156,26 +139,30 @@ else
                 ;;
 
             b)
-                # Process the list of duplicate files and keep only the first occurrence of each checksum
+                # Process the list of duplicate files and keep only the oldest occurrence of each checksum
                 unique_checksums=$(echo "$duplicate_files" | awk '!seen[$1]++ {print $1}')
 
-                # Loop through the unique checksums and delete the duplicates while keeping the first occurrence
+                # Loop through the unique checksums and delete the newest files while keeping the oldest
                 while read -r checksum; do
-                    # Keep the first occurrence and delete the rest
-                    first_file=$(grep "$checksum" <<< "$duplicate_files" | head -n 1 | awk '{print $2}')
-                    grep -v "$first_file" <<< "$duplicate_files" | cut -d' ' -f2- | xargs -0 rm
+                    # Get all files with the current checksum, sorted by modification time (newest first)
+                    files_with_checksum=$(grep "$checksum" <<< "$duplicate_files" | awk '{print $2}' | xargs ls -t)
+
+                    # Keep the oldest file and delete the rest
+                    oldest_file=$(echo "$files_with_checksum" | tail -n 1)
+                    files_to_delete=$(echo "$files_with_checksum" | head -n -1)
+
+                    # Delete the newest duplicate files
+                    echo "$files_to_delete" | while read -r file; do
+                        rm "$file"
+                    done
                 done <<< "$unique_checksums"
 
-                echo "Duplicate files deleted. Original files are kept."
                 echo ""
-                echo "Exiting script! Goodbye!"
+                echo -e "${red}FILES HAVE BEEN DELETED!${reset} Original files of duplicates have been kept."
+                echo ""
+                echo "Hope you were sure! Goodbye!"
                 echo ""
                 exit 0
-                ;;
-
-            *)
-                echo "${red}Invalid choice.${reset} Please enter a or b."
-                echo ""
                 ;;
         esac
     done
