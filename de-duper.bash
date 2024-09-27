@@ -57,6 +57,9 @@ echo -e "       ___  __  __  ____  ____  ____       ____   ____       ____   __ 
 echo -e "      / __)(  )(  )(  _ \( ___)(  _ \ ___ (  _ \ ( ___) ___ (  _ \ (  )(  )(  _ \( ___)(  _ \     "
 echo -e "      \__ \ )(__)(  )___/ )__)  )   /(___) )(_) ) )__) (___) )(_) ) )(__)(  )___/ )__)  )   /     "
 echo -e "      (___/(______)(__)  (____)(_)\_)     (____/ (____)     (____/ (______)(__)  (____)(_)\_)     "
+echo -e ""
+echo -e "        This script is designed to find all files within the working directory that are exact     "
+echo -e "       duplicates and will either save them to a text file or delete them based on your choice.   "
 echo -e "${reset}"
 
 
