@@ -80,7 +80,7 @@ esac
 # Call the validate_directory fucntion to verify the provided directory
 validate_directory "$directory"
 echo
-echo -e "Searching for duplicate files the following directory: " "$directory"
+echo -e "Getting the file count within the following directory and all subdirectories: " "$directory"
 
 # Count the number of files in the directory
 num_files=$(find "$directory" -type f | wc -l)
