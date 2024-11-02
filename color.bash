@@ -5,24 +5,22 @@
 ## Copyright: (c) 2023
 
 # Color variables
-green=$(tput setaf 2)
-yellow=$(tput setaf 3)
-red=$(tput setaf 1)
-blue=$(tput setaf 4)
-purple=$(tput setaf 5)
-orange=$(tput setaf 166)
-cyan=$(tput setaf 6)
-dim=$(tput dim)
-reset=$(tput sgr0) # No Color
+green='\033[0;32m'
+yellow='\033[0;33m'
+red='\033[0;31m'
+blue='\033[0;34m'
+purple='\033[0;35m'
+orange='\033[0;38;5;166m'
+cyan='\033[0;36m'
+dim='\033[2m'
+reset='\033[0m' # No Color
 
-
-# Usage example
-echo -e "${green}This text is green.${reset}"
-echo -e "${yellow}This text is yellow.${reset}"
-echo -e "${red}This text is red.${reset}"
-echo -e "${blue}This text is blue.${reset}"
-echo -e "${purple}This text is purple.${reset}"
-echo -e "${orange}This text is orange.${reset}"
-echo -e "${cyan}This text is cyan.${reset}"
-echo -e "${dim}This text is dimmed.${reset}"
+echo -e "${green}This is green text${reset}"
+echo -e "${yellow}This is yellow text${reset}"
+echo -e "${red}This is red text${reset}"
+echo -e "${blue}This is blue text${reset}"
+echo -e "${purple}This is purple text${reset}"
+echo -e "${orange}This is orange text${reset}"
+echo -e "${cyan}This is cyan text${reset}"
+echo -e "${dim}This is dim text${reset}"
 echo -e "${reset}This text is normal.${reset}"
