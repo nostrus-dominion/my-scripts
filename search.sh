@@ -89,16 +89,14 @@ parse_arguments() {
     [ -z "$search_term" ] && usage
 }
 
-# Function to show a growing dot animation while waiting
-show_dots() {
+# Function to show a spinning animation while waiting
+show_spinner() {
     local pid=$1
-    local dots="."
+    local spinner="|/-\\"
+    local i=0
     while kill -0 "$pid" 2>/dev/null; do
-        for ((i=0; i<4; i++)); do
-            echo -ne "\rSearching${dots}"
-            dots="$dots."
-            sleep 0.5
-        done
+        printf "\rSearching ${spinner:i++%${#spinner}:1}"
+        sleep 0.1
     done
     echo -ne "\rDone!         \n"
 }
@@ -119,7 +117,7 @@ temp_file=$(mktemp)
     find -L "$search_dir" ! -path "$search_dir" $search_type -iname "*${search_term}*" -maxdepth 10 2>/dev/null > "$temp_file"
 } &
 dots_pid=$!
-show_dots "$dots_pid"
+show_spinner "$dots_pid"
 
 # Ensure the background process has finished before proceeding
 wait "$dots_pid"
