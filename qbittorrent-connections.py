@@ -21,9 +21,11 @@ CREATE TABLE IF NOT EXISTS qbit_connections (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ip TEXT NOT NULL,
     port INTEGER NOT NULL,
+    port_open INTEGER,
     UNIQUE(ip, port)
 )
 ''')
+
 
 # Login to qBittorrent
 session = requests.Session()
