@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Version 0.4
+# Version 0.6
 
-# Prune the specific path
-find /mnt/thevault -path '/mnt/thevault/Nginx-Fancyindex-Theme-dark' -prune -o \( -type d \! -perm 775 \) -print0 | xargs -0 chmod 775
-find /mnt/thevault -path '/mnt/thevault/Nginx-Fancyindex-Theme-dark' -prune -o \( -type f \! -perm 755 \) -print0 | xargs -0 chmod 755
+sudo find /mnt/plex -path '/mnt/thevault/Nginx-Fancyindex-Theme-dark' -prune \( ! -user pmusselman -o ! -group pmusselman -o \( -type d -a ! -perm 775 \) -o \( -type f -a ! -perm 755 \) \) -exec chown -v pmusselman:pmusselman {} + -exec chmod -v u+rwX,g+rwX,o+rX {} + -exec test -d {} \; -exec chmod -v 775 {} + -exec test -f {} \; -exec chmod -v 755 {} +
