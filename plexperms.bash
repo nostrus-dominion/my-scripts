@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# Version 0.5
+# Version 0.6
 # License: GPL
 
-sudo find /mnt/plex \( ! -user plex -o ! -group plex \) -exec chown -R plex:plex -- {} +
+sudo find /mnt/plex \( ! -user plex -o ! -group plex -o \( -type d -a ! -perm 775 \) -o \( -type f -a ! -perm 755 \) \) -exec chown -v plex:plex {} + -exec chmod -v u+rwX,g+rwX,o+rX {} + -exec test -d {} \; -exec chmod -v 775 {} + -exec test -f {} \; -exec chmod -v 755 {} +
 
-sudo find /mnt/plex \( ! -perm 775 -type d \) -exec chmod 775 -- {} +
-
-sudo find /mnt/plex \( ! -perm 755 -type f \) -exec chmod 755 -- {} +
