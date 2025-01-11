@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Version 1.0
+## Version 1.1
 ## Created 2024-09-15
 ## License: Open Source GPL
 ## Copyright: (c) 2024
@@ -127,7 +127,13 @@ sorted_results=$(sort "$temp_file")
 
 # Output the findings to a .txt file in the $HOME directory
 output_file="$HOME/search_results_$(date +%Y%m%d_%H%M%S).txt"
-echo "$sorted_results" > "$output_file"
+{
+    echo "Search term: \"$search_term\""
+    echo "Search type: ${search_type/-type /}"
+    echo "Search directory: \"$search_dir\""
+    echo
+    echo "$sorted_results"
+} > "$output_file"
 echo "Search results saved to $output_file"
 
 # Cleanup temporary file
