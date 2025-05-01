@@ -6,7 +6,7 @@
 echo "Scanning and correcting file ownership and permissions..."
 
 # Find all files/dirs that don't match user/group/permission criteria
-changed_files=$(sudo find . \( ! -user plex -o ! -group plex -o \( -type d -a ! -perm 775 \) -o \( -type f -a ! -perm 755 \) \))
+changed_files=$(sudo find /mnt/plex/ \( ! -user plex -o ! -group plex -o \( -type d -a ! -perm 775 \) -o \( -type f -a ! -perm 755 \) \))
 
 # Apply fixes
 if [[ -n "$changed_files" ]]; then
