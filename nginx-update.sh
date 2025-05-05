@@ -12,13 +12,21 @@ yellow=$(tput setaf 3)
 red=$(tput setaf 1)
 reset=$(tput sgr0) # No Color
 
+# Check if Nginx is already installed
+if ! command -v nginx &> /dev/null; then
+    echo
+    echo "${red}Error!${reset} Nginx is not installed. Exiting script."
+    echo
+    exit 1
+fi
+
 # Exit immediately if a command exits with a non-zero status
 set -e
 
 # Check if user has root privileges
 if [ "$EUID" -ne 0 ]; then
     echo
-    echo "This script must be run as root. Please prefix the command with 'sudo'."
+    echo "This script must be run as root."
     echo
     exit 1
 fi
@@ -33,19 +41,11 @@ for cmd in curl wget tar make gcc; do
     fi
 done
 
-# Check if Nginx is already installed
-if ! command -v nginx &> /dev/null; then
-    echo
-    echo "Error: Nginx is not installed. Please install it first."
-    echo
-    exit 1
-fi
-
 # Fetch the latest Nginx version
 latest_version=$(curl -s https://nginx.org/en/download.html | grep -oP 'nginx-\K[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)
 if [ -z "$latest_version" ]; then
 	echo
-    echo "Error: Unable to fetch the latest Nginx version. Please check your internet connection or the Nginx website."
+    echo "${red}Error!${reset} Unable to fetch the latest Nginx version. Please check your internet connection or the Nginx website."
     echo
     exit 1
 fi
@@ -64,7 +64,7 @@ if [ "$latest_version" != "$installed_version" ]; then
         backup_file="$user_home/nginx_backup_$(date +%Y%m%d%H%M%S).tar.gz"
         echo "Creating backup at $backup_file..."
         tar -czvf "$backup_file" /etc/nginx /usr/sbin/nginx /var/log/nginx /var/www/html || {
-            echo "Error: Failed to create backup."
+            echo "${red}Error!${reset} Failed to create backup."
             exit 1
         }
 
