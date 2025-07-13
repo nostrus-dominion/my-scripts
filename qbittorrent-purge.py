@@ -1,4 +1,4 @@
-#!/usr/bin/python3 
+#!/usr/bin/python3
 
 import requests
 import datetime
@@ -10,12 +10,12 @@ import sys
 # ======== CONFIGURATION ========
 QBITTORRENT_HOST = "http://localhost:8080"
 USERNAME = "admin"
-PASSWORD = "adminadmin"
-CATEGORIES_TO_CHECK = ["torrent"]  # Configure to the catagories you want to check. Use comma between catagories.
-DAYS_THRESHOLD = 365
+PASSWORD = "StackAccess11#"
+CATEGORIES_TO_CHECK = ["sonarr", "radarr"]  # Configure to the catagories you want to check. Use comma between catagories.
+DAYS_THRESHOLD = 30
 
 # Logging config
-LOG_FILE = "torrent_purge.log"
+LOG_FILE = ".cache/torrent_purge.log"
 LOG_MAX_BYTES = 1 * 1024 * 1024  # 1 MB
 LOG_BACKUP_COUNT = 3
 # ===============================
