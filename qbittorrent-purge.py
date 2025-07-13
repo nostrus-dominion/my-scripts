@@ -10,8 +10,8 @@ import sys
 # ======== CONFIGURATION ========
 QBITTORRENT_HOST = "http://localhost:8080"
 USERNAME = "admin"
-PASSWORD = "StackAccess11#"
-CATEGORIES_TO_CHECK = ["sonarr", "radarr"]  # Configure to the catagories you want to check. Use comma between catagories.
+PASSWORD = "admimadmin"
+CATEGORIES_TO_CHECK = ["torrent"]  # Configure to the catagories you want to check. Use comma between catagories.
 DAYS_THRESHOLD = 30
 
 # Logging config
