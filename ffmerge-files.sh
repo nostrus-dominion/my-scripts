@@ -127,7 +127,7 @@ validateFiles() {
         # Call on show_progress function and update progress bar
         ((current_file++))
         local progress=$((current_file * 100 / total_files))
-        show_progress "$progress"
+        showProgress "$progress"
     done
 
     echo -e ""  # Move to the next line after the progress bar is completed
