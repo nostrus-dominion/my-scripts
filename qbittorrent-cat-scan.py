@@ -5,7 +5,7 @@ from collections import defaultdict
 
 QBITTORRENT_URL = 'http://localhost:8080'  # adjust if needed
 USERNAME = 'admin'
-PASSWORD = 'StackAccess11#'
+PASSWORD = 'adminadmin'
 
 session = requests.Session()
 
