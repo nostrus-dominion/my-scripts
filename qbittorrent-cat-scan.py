@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 
 import requests
-import os
+from collections import defaultdict
 
-QBITTORRENT_URL = 'http://localhost:8080' # change all this for the setup
+QBITTORRENT_URL = 'http://localhost:8080'  # adjust if needed
 USERNAME = 'admin'
-PASSWORD = 'adminadmin'
-BASE_PATH = '/mnt/dump'
+PASSWORD = 'StackAccess11#'
 
 session = requests.Session()
 
@@ -18,67 +17,42 @@ def login():
     if res.text != 'Ok.':
         raise Exception('Login failed')
 
-def get_categories():
-    res = session.get(f'{QBITTORRENT_URL}/api/v2/torrents/categories')
-    return list(res.json().keys())
-
-def get_category_torrents(category):
-    res = session.get(f'{QBITTORRENT_URL}/api/v2/torrents/info', params={
-        'category': category
-    })
+def get_all_torrents():
+    """Fetch all torrents from the client."""
+    res = session.get(f'{QBITTORRENT_URL}/api/v2/torrents/info')
     return res.json()
-
-def list_downloaded_items(directory):
-    try:
-        return set(os.listdir(directory))
-    except FileNotFoundError:
-        print(f"Directory '{directory}' does not exist.")
-        return set()
 
 def main():
     login()
-    categories = get_categories()
+    torrents = get_all_torrents()
 
-    if not categories:
-        print("No categories found.")
-        return
-
-    print("Available categories:")
-    for i, cat in enumerate(categories):
-        print(f"{i + 1}. {cat}")
-
-    choice = input("Enter the number of the category to check: ")
-
-    try:
-        index = int(choice) - 1
-        if index < 0 or index >= len(categories):
-            raise ValueError
-        category = categories[index]
-    except ValueError:
-        print("Invalid selection.")
-        return
-
-    folder = os.path.join(BASE_PATH, category)
-    print(f"Checking local folder: {folder}")
-
-    torrents = get_category_torrents(category)
-    seeded_items = set()
+    total_count = len(torrents)
+    seeding_count = 0
+    not_seeded_by_category = defaultdict(list)
 
     for torrent in torrents:
-        content_path = os.path.join(torrent['save_path'], torrent['name'])
-        seeded_items.add(os.path.basename(content_path))
+        # States that count as "actively seeding"
+        if torrent['state'] in ('uploading', 'stalledUP', 'checkingUP', 'forcedUP'):
+            seeding_count += 1
+        else:
+            not_seeded_by_category[torrent['category'] or 'Uncategorized'].append(torrent['name'])
 
-    on_disk_items = list_downloaded_items(folder)
+    # Summary
+    print("=== Torrent Summary ===")
+    print(f"Total torrents: {total_count}")
+    print(f"Seeding torrents: {seeding_count}")
+    print(f"Not seeding: {total_count - seeding_count}")
 
-    not_seeded = on_disk_items - seeded_items
+    # Breakdown
+    print("\n=== Torrents NOT being seeded, grouped by category ===")
+    if not not_seeded_by_category:
+        print("✅ All torrents are actively seeding.")
+        return
 
-    print(f"\n=== Results for Category: {category} ===")
-    if not_seeded:
-        print("Items on disk NOT being seeded:")
-        for item in sorted(not_seeded):
+    for category, items in sorted(not_seeded_by_category.items()):
+        print(f"\nCategory: {category} ({len(items)} not seeding)")
+        for item in sorted(items):
             print(f" - {item}")
-    else:
-        print("All items in the directory are being seeded.")
 
 if __name__ == '__main__':
     main()
