@@ -1,67 +1,56 @@
 #!/bin/bash
+shopt -s nullglob
 
-# Check if an argument is provided
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <directory>"
-    exit 1
+root="$1"
+
+if [ -z "$root" ]; then
+  echo "Usage: $0 <root-directory>"
+  exit 1
 fi
 
-# Check if the directory exists
-if [ ! -d "$1" ]; then
-    echo "Error: Directory '$1' not found."
-    exit 1
+if [ ! -d "$root" ]; then
+  echo "Error: '$root' is not a directory"
+  exit 1
 fi
 
-# Change to the specified directory
-cd "$1" || exit
+find "$root" -type d | while IFS= read -r dir; do
+  cd "$dir" || continue
 
-# Get the total number of files in the directory
-total_files=$(find . -maxdepth 1 -type f | wc -l)
+  parent="$(basename "$dir")"
 
-# Calculate the number of digits needed for padding
-num_digits=$(echo -n "$total_files" | wc -c)
+  # Build list of extensions in this directory
+  declare -A ext_counts=()
 
-# Counter for numbering the files
-count=1
+  for f in *.*; do
+    [ -f "$f" ] || continue
+    ext="${f##*.}"
+    ((ext_counts["$ext"]++))
+  done
 
-# Get the first file to show an example
-first_file=$(ls | grep -v '^\.' | head -n 1)
+  # Process each extension group
+  for ext in "${!ext_counts[@]}"; do
+    count="${ext_counts[$ext]}"
+    files=( *."$ext" )
 
-# Display the user prompt
-echo "You are about to rename $total_files files."
-echo "For example, ${first_file} will be renamed to ${first_file%.*}_$(printf "%0${num_digits}d" "$count").${first_file##*.}"
-read -p "Do you wish to continue? (y/N) " choice
+    if [ "$count" -eq 1 ]; then
+      src="${files[0]}"
+      dest="${parent}.${ext}"
 
-# Check the user's choice
-case "$choice" in
-    y|Y) echo "Renaming files..."
-    ;;
-    *) echo "Operation cancelled."
-       exit
-    ;;
-esac
+      if [ "$src" != "$dest" ]; then
+        echo "Renaming: $src -> $dest"
+        mv -n -- "$src" "$dest"
+      fi
+    else
+      i=1
+      for src in "${files[@]}"; do
+        printf -v num "%03d" "$i"
+        dest="${parent}-${num}.${ext}"
 
-# Loop through each file in the directory
-for file in *; do
-    # Check if the file is a directory
-    if [ -d "$file" ]; then
-        # Skip directories
-        continue
+        echo "Renaming: $src -> $dest"
+        mv -n -- "$src" "$dest"
+        ((i++))
+      done
     fi
+  done
 
-    # Get the name of the parent directory
-    parent_dir=$(basename "$(pwd)")
-
-    # Get the file extension
-    extension="${file##*.}"
-
-    # Pad the count with zeros
-    padded_count=$(printf "%0${num_digits}d" "$count")
-
-    # Rename the file to the name of the parent directory with numerical suffix and extension
-    mv "$file" "${parent_dir}_${padded_count}.${extension}"
-
-    ((count++))
 done
-
-echo "Files renamed successfully."

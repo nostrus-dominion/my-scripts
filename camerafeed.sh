@@ -15,7 +15,9 @@ STREAM=${STREAM:-stream1}
 # Build RTSP URL
 URL="rtsp://$CAM_USER:$CAM_PASS@$CAM_IP:554/$STREAM"
 
-echo "Opening $URL ..."
-ffplay -rtsp_transport tcp "$URL" > /dev/null 2>&1 &
+echo "Opening stream ..."
+ffplay -rtsp_transport tcp \
+	-window_title "Living Room" \
+	"$URL" > /dev/null 2>&1 &
 disown
 
