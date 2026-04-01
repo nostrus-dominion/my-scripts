@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# Version 0.9
+# Version 1.0
 # License: GPL
+
+if [ "$EUID" -ne 0 ]; then
+  echo "This script must be run as root."
+  exit 1
+fi
 
 LOGFILE="/var/log/script-logs/plexperms.log"
 mkdir -p "$(dirname "$LOGFILE")"
