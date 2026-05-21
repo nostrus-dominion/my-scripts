@@ -5,7 +5,7 @@ import os
 # qBittorrent Web UI credentials and URL
 qb_url = 'http://10.1.10.30:8080/api/v2'
 qb_username = 'admin'
-qb_password = 'StackAccess11#'
+qb_password = 'adminadmin'
 
 # Determine the correct path for the database
 if os.name == 'nt':  # Windows
