@@ -1,0 +1,123 @@
+#!/bin/bash
+
+## Version 0.4
+## License: Open Source GPL
+## Copyright: (c) 2023
+## Dependancy: parallel
+
+#######################
+## ALL THE BORING STUFF
+#######################
+
+# Global Variables for ANSI color
+source "${XDG_CONFIG_HOME:-$HOME/.config}/my-scripts/colors.conf" || exit 1
+
+# Dependency check.
+dependencies=("date" "find" "wc" "touch")
+missing_dependencies=()
+for dependency in "${dependencies[@]}"; do
+  if ! command -v "$dependency" >/dev/null 2>&1; then
+    missing_dependencies+=("$dependency")
+  fi
+done
+if ((${#missing_dependencies[@]})); then
+  for dependency in "${missing_dependencies[@]}"; do
+    printf 'ERROR: Required command "%s" is not installed or not in PATH.\n' "$dependency" >&2
+  done
+  exit 1
+fi
+
+# Script usage
+if [ -z "$1" ]; then
+  directory=$(pwd)
+else
+  directory="$1"
+fi
+if [ ! -d "$directory" ]; then
+  echo -e ${red}"Directory $directory does not exist."
+  echo -e "Exiting script!"${reset}
+  exit 1
+fi
+
+# ASCII art splash screen
+
+echo -e "${orange}"
+cat << 'SPLASH'
+  _____        _          _____ _                                 
+ |  __ \      | |        / ____| |                                
+ | |  | | __ _| |_ ___  | |    | |__   __ _ _ __   __ _  ___ _ __ 
+ | |  | |/ _| | __/ _ \ | |    | '_ \ / _| | '_ \ / _| |/ _ \ '__|
+ | |__| | (_| | ||  __/ | |____| | | | (_| | | | | (_| |  __/ |   
+ |_____/ \__,_|\__\___|  \_____|_| |_|\__,_|_| |_|\__, |\___|_|   
+                                                   __/ |          
+                                                  |___/           
+    A script to update creation dates of files and directories.   
+SPLASH
+echo -e "${reset}"
+
+# Verify the current directory
+echo
+echo "Current directory: $(pwd)"
+echo
+read -rp "Do you wish to continue? (y/N): " dir_confirm
+
+if [ "${dir_confirm,,}" != "yes" ] && [ "${dir_confirm,,}" != "y" ]; then
+  echo
+  echo "Exiting script!"
+  exit 1
+fi
+
+cd "$directory" || exit 1
+
+# Sanitize input for the target date and time
+echo
+read -rp "Enter the desired date and time (YYYY-MM-DD HH:MM:SS): " target_datetime
+
+# Validate the date and time format
+if ! date -d "$target_datetime" > /dev/null; then
+  echo
+  echo -e "${red}ERROR!${reset} Invalid date and time format. Please use the format YYYY-MM-DD HH:MM:SS."
+  exit 1
+fi
+
+# Count total items
+total_items=$(find . -type f -o -type d | wc -l)
+
+# Initialize progress bar
+echo -n "Changing creation date of items... "
+echo ""
+printf "["
+for ((i = 0; i < 50; i++)); do printf " "; done
+printf "]"
+
+# Set up variables
+error_occurred=false
+
+# Iterate over items and change their creation date
+find . -type f -o -type d | while IFS= read -r item; do
+  current_item=$((current_item + 1))
+  touch -d "$target_datetime" "$item" > /dev/null 2>&1
+
+  # Update progress bar
+  progress=$((current_item * 50 / total_items))
+  printf "\rChanging creation date of items... ["
+  for ((j = 0; j < progress; j++)); do printf "#"; done
+  for ((k = progress; k < 50; k++)); do printf " "; done
+  printf "] $((current_item * 100 / total_items))%% complete"
+
+  # Check if an error occurred
+  if [ $? -ne 0 ]; then
+    error_occurred=true
+    break
+  fi
+done
+
+# Check if any error occurred and exit if true
+if [ "$error_occurred" = true ]; then
+  echo
+  echo "Failed to change date for some items. Exiting script."
+  exit 1
+fi
+
+echo ""
+echo "Process completed. Updated the dates for $total_items items."
