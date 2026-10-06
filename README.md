@@ -7,59 +7,58 @@ machines. Most are Bash scripts. The media and API tools use Python, and the
 Windows helpers use PowerShell. Each script runs on its own; there is no shared
 launcher or installer.
 
-This README covers the files in the supplied `my-scripts.zip`, including the
-`ffmerge-er` documentation, configuration examples, and the supplied license.
-
 ## Contents
 
 - [Getting started](#getting-started)
 - [Configuration](#configuration)
-- [Script catalog](#script-catalog)
-- [ffmerge-er](#ffmerge-er)
-- [Video frames](#video-frames)
-- [Dropbox downloads and uploads](#dropbox-downloads-and-uploads)
-- [Duplicate files](#duplicate-files)
-- [Permissions and renaming](#permissions-and-renaming)
-- [qBittorrent tools](#qbittorrent-tools)
-- [Tautulli stream control](#tautulli-stream-control)
-- [System and network tools](#system-and-network-tools)
-- [Current limitations](#current-limitations)
-- [Validation](#validation)
 - [License and credits](#license-and-credits)
 
 ## Getting started
 
-Use the interpreter that matches the script:
+Run the script with its matching interpreter from the repository directory:
 
 ```bash
-# Linux examples, from the repository directory.
+# Bash scripts.
 bash ./dropbox.sh --help
+
+# Python scripts.
 python3 ./frames.py --help
+python3 ./ffmerge-er --help
 ```
 
 ```powershell
-# Windows PowerShell, from the repository directory.
+# Windows PowerShell.
 .\find_duplicate_files.ps1
 ```
 
-For direct execution on Linux, make the selected script executable:
+For direct execution on Linux, make the selected script executable if needed:
 
 ```bash
 chmod +x ./ffmerge-er
 ./ffmerge-er --help
 ```
 
-Most shell tools expect GNU/Linux commands. `de-duper.bash` requires Bash 4.4 or
-newer. `ansi-colors.sh` uses POSIX shell syntax. Python tools require Python 3;
-`ffmerge-er` and `frames.py` use the standard library plus external media tools.
-The PowerShell scripts generally target Windows; share discovery uses the older
-`Get-WmiObject` command and the Active Directory module.
+Most shell tools expect Bash and GNU/Linux utilities. `de-duper.bash` requires
+Bash 4.4 or newer; `ansi-colors.sh` uses POSIX shell syntax. Python tools require
+Python 3. `ffmerge-er` and `frames.py` use Python's standard library and external
+media tools. The PowerShell scripts generally target Windows; share discovery
+uses `Get-WmiObject` and the Active Directory module.
+
+`ffmerge-er` and `ffmerge-er.py` are identical entry files. See
+[FFMERGE-ER.md](FFMERGE-ER.md) for its media commands and usage examples.
 
 Many scripts check dependencies before starting and report missing commands or
-modules to stderr. Some older scripts have no preflight, and some require their
+modules to stderr. Some older scripts have no dependency check, and some require
 configuration before they can show help. Dependency checks do not install
-anything. `nginx-update.sh` and `system-check.sh` explicitly perform installation
-or maintenance as part of their jobs.
+anything. `nginx-update.sh` and `system-check.sh` perform installation or
+maintenance as part of their jobs.
+
+Install the dependencies needed by the script you plan to run, and review its
+paths and settings before running it. Help is available where implemented; not
+every script accepts `--help`.
+
+Text files use LF line endings. `.gitattributes` enforces that rule for Git, and
+`.editorconfig` sets the matching editor preference.
 
 ## Configuration
 
@@ -79,12 +78,13 @@ mkdir -p "$config_dir"
 cp -i .config/colors.conf "$config_dir/colors.conf"
 ```
 
-It provides standard and bright foreground colors, background colors, text
-styles, `$reset`, and the `fg256`, `bg256`, `fg_rgb`, and `bg_rgb` functions.
-`brown` is a compatibility alias for `yellow`.
+The file provides standard and bright foreground colors, background colors,
+text styles, `$reset`, and the `fg256`, `bg256`, `fg_rgb`, and `bg_rgb`
+functions. `brown` is a compatibility alias for `yellow`.
 
-Several older scripts reference `$orange`, but the included file does not define
-it. Add this assignment if you want their splash screens colored:
+Several older scripts reference `$orange`, which the included file does not
+define. Add this assignment to your installed `colors.conf` to color their
+splash screens:
 
 ```bash
 orange=$'\e[38;5;208m'
@@ -108,7 +108,7 @@ Shared colors still use the XDG path above. Use an absolute path for the overrid
 
 | Template | Used by | Settings |
 | --- | --- | --- |
-| `.env.ffmerge-er.example` | `ffmerge-er` / `ffmerge-er.py` | Encoding, audio, GIF, and thumbnail defaults; optional |
+| `.env.ffmerge-er.example` | `ffmerge-er` / `ffmerge-er.py` | Optional encoding, audio, GIF, and thumbnail defaults |
 | `.env.check-mount.example` | `check-mount.sh` | Mount paths, matching sentinel file paths, mount options |
 | `.env.tree.example` | `tree.sh` | Colon-separated disk paths and optional email address |
 | `.env.qbittorrent-cat-scan.example` | `qbittorrent-cat-scan.py` | WebUI URL, username, password |
@@ -116,38 +116,40 @@ Shared colors still use the XDG path above. Use an absolute path for the overrid
 | `.env.qbittorrent-port-scan.example` | `qbittorrent-port-scan.py` | The same SQLite database path |
 | `.env.qbittorrent-purge.example` | `qbittorrent-purge.py` | WebUI credentials, categories, age threshold, log path |
 | `.env.tautulli-kill-stream.example` | `tautulli-kill-stream.py` | Tautulli URLs, API key, encoding, TLS verification |
-| `.env.mam-cookie.example` | No corresponding script in this archive | MAM ID and optional state directory |
-| `.env.plexperms.example` | No corresponding script in this archive | Plex directory, ownership, log path |
-| `.env.vaultperms.example` | No corresponding script in this archive | Vault directory, ownership, exclusion |
+
+Three additional templates have no matching scripts in this repository:
+`.env.mam-cookie.example`, `.env.plexperms.example`, and
+`.env.vaultperms.example`.
 
 The qBittorrent scripts, `check-mount.sh`, and `tree.sh` require their settings
-files. The Python configuration readers accept literal `NAME='value'`
-assignments; they do not execute shell commands or expand `$VARIABLE` expressions.
-Existing environment variables take precedence over their file values.
-For `ffmerge-er`, command-line options take precedence over both.
+files. `ffmerge-er` and the Tautulli helper can also read settings from the
+environment without a settings file.
+
+Python configuration readers accept literal `NAME='value'` assignments. They
+do not execute shell commands or expand `$VARIABLE` expressions. Existing
+environment variables take precedence over file values. For `ffmerge-er`,
+command-line options take precedence over both.
 
 Shell scripts source their settings as shell code. Keep those files private and
-use trusted contents. The included `.gitignore` excludes `.env` and `.env.*`
-while retaining `.env.*.example` templates.
+use trusted contents. `.gitignore` excludes `.env` and `.env.*` while retaining
+`.env.*.example` templates.
 
 When running with `sudo`, configuration normally resolves against the effective
 user's home. Set `XDG_CONFIG_HOME` explicitly if the script should read your
 regular user's colors; set `MY_SCRIPTS_CONFIG_DIR` separately for private settings.
 
-`.config/.theboringstuff` is a reusable shell preamble, not a configuration file
-required by the tools.
+`.config/.theboringstuff` is a shell preamble to adapt when writing scripts.
+The tools do not load it as a shared configuration file.
 
 ## License and credits
 
-The supplied repository license is the GNU General Public License, version 3.
-Its complete, unchanged text is included below so this README contains the
-supplied license as well as the usage documentation. When distributing the
-repository, retaining a separate `LICENSE.md` is also useful.
+The repository includes the GNU General Public License, version 3, in
+[LICENSE.md](LICENSE.md). The full text is also included below.
 
 Individual files retain their own notices and credits. `ffmerge-er` explicitly
 states GPL-3.0-or-later; `domain-cert-check.py` credits Akkana Peck under GPLv3 or
 later. `ansi-colors.sh` carries an LGPLv2 notice and Pixelbeat attribution.
-Do not replace those file-specific notices with a blanket license claim.
+Retain the file-specific notices when copying or modifying scripts.
 
 Credits recorded in the source include Paul Musselman; Dave Plonka
 (`99bottles.bash`); Pixelbeat (`ansi-colors.sh`); Akkana Peck
@@ -838,3 +840,4 @@ Public License instead of this License.  But first, please read
 ```
 
 </details>
+
