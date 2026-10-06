@@ -1,0 +1,21 @@
+#######################
+## ALL THE BORING STUFF
+#######################
+
+# Global Variables for ANSI color
+source "${XDG_CONFIG_HOME:-$HOME/.config}/my-scripts/colors.conf" || exit 1
+
+# Dependency check
+dependencies=("")
+missing_dependencies=()
+for dependency in "${dependencies[@]}"; do
+  if ! command -v "$dependency" >/dev/null 2>&1; then
+    missing_dependencies+=("$dependency")
+  fi
+done
+if ((${#missing_dependencies[@]})); then
+  for dependency in "${missing_dependencies[@]}"; do
+    printf 'ERROR: Required command "%s" is not installed or not in PATH.\n' "$dependency" >&2
+  done
+  exit 1
+fi
