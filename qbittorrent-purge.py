@@ -23,6 +23,8 @@ if _dependency_missing:
 
 import requests
 import datetime
+import argparse
+from urllib.parse import urlsplit
 import logging
 import logging.handlers
 import os
@@ -108,21 +110,60 @@ logger.addHandler(console)
 # ===============================
 
 session = requests.Session()
+# qBittorrent requires a matching Origin/Referer when WebUI CSRF protection is active.
+_parts = urlsplit(QBITTORRENT_HOST)
+if _parts.scheme not in ("http", "https") or not _parts.netloc:
+    raise SystemExit("QBITTORRENT_URL must be a full http:// or https:// URL")
+_origin = f"{_parts.scheme}://{_parts.netloc}"
+session.headers.update({"Origin": _origin, "Referer": QBITTORRENT_HOST + "/"})
+REQUEST_TIMEOUT = 15
 
 
 def login():
-    resp = session.post(
-        f"{QBITTORRENT_HOST}/api/v2/auth/login", data={"username": USERNAME, "password": PASSWORD}
-    )
-    if resp.text != "Ok.":
-        logger.error("Failed to log in to qBittorrent WebUI.")
-        sys.exit(1)
+    endpoint = f"{QBITTORRENT_HOST}/api/v2/auth/login"
+    try:
+        resp = session.post(
+            endpoint,
+            data={"username": USERNAME, "password": PASSWORD},
+            timeout=REQUEST_TIMEOUT,
+        )
+    except requests.RequestException as exc:
+        logger.error("Could not connect to qBittorrent WebUI: %s", exc)
+        raise SystemExit(1)
 
+    # qBittorrent 5.2.0+ returns 204 No Content after a successful login.
+    # Older versions return 200 with the literal body 'Ok.'.
+    # Reject anything else rather than blindly accepting all 2xx responses.
+    if not (
+        resp.status_code == 204
+        or (resp.status_code == 200 and resp.text.strip() == "Ok.")
+    ):
+        logger.error(
+            "qBittorrent WebUI login failed: HTTP %s; response=%r; URL=%s",
+            resp.status_code,
+            resp.text.strip()[:200],
+            resp.url,
+        )
+        if resp.status_code == 403:
+            logger.error("HTTP 403: possible IP login ban, CSRF protection, or Host validation failure.")
+        elif resp.text.strip() == "Fails.":
+            logger.error("qBittorrent reported invalid credentials. Check WebUI username/password.")
+        elif resp.status_code in (301, 302, 307, 308) or "html" in resp.headers.get("Content-Type", "").lower():
+            logger.error("Received redirect/HTML instead of the API response. Check QBITTORRENT_URL and proxy configuration.")
+        raise SystemExit(1)
+    logger.info("qBittorrent WebUI login succeeded.")
 
 def get_all_torrents():
-    resp = session.get(f"{QBITTORRENT_HOST}/api/v2/torrents/info")
-    return resp.json()
-
+    try:
+        resp = session.get(f"{QBITTORRENT_HOST}/api/v2/torrents/info", timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+        if not isinstance(data, list):
+            raise ValueError("Expected a JSON list of torrents")
+        return data
+    except (requests.RequestException, ValueError) as exc:
+        logger.error("Failed to retrieve torrents: %s", exc)
+        raise SystemExit(1)
 
 def delete_torrents(torrents):
     if not torrents:
@@ -132,10 +173,16 @@ def delete_torrents(torrents):
     hashes = [t["hash"] for t in torrents]
     hash_str = "|".join(hashes)
 
-    session.post(
-        f"{QBITTORRENT_HOST}/api/v2/torrents/delete",
-        data={"hashes": hash_str, "deleteFiles": "true"},
-    )
+    try:
+        resp = session.post(
+            f"{QBITTORRENT_HOST}/api/v2/torrents/delete",
+            data={"hashes": hash_str, "deleteFiles": "true"},
+            timeout=REQUEST_TIMEOUT,
+        )
+        resp.raise_for_status()
+    except requests.RequestException as exc:
+        logger.error("Torrent deletion request failed: %s", exc)
+        raise SystemExit(1)
 
     for t in torrents:
         added_on = datetime.datetime.fromtimestamp(t["added_on"]).date()
@@ -143,7 +190,15 @@ def delete_torrents(torrents):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Purge old torrents from selected qBittorrent categories.")
+    parser.add_argument("--check-login", action="store_true", help="Test authentication only (does not delete anything).")
+    parser.add_argument("--dry-run", action="store_true", help="Show matching torrents without deleting anything.")
+    args = parser.parse_args()
+
     login()
+    if args.check_login:
+        logger.info("Login-only check complete; no torrents were touched.")
+        return
     all_torrents = get_all_torrents()
     now = datetime.datetime.now()
     cutoff = now - datetime.timedelta(days=DAYS_THRESHOLD)
@@ -160,8 +215,13 @@ def main():
                 )
                 to_remove.append(torrent)
 
+    if args.dry_run:
+        logger.info("Dry run: %d torrents would be deleted; nothing was deleted.", len(to_remove))
+        return
+
     delete_torrents(to_remove)
 
 
 if __name__ == "__main__":
     main()
+
