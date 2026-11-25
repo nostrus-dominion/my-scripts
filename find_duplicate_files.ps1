@@ -1,80 +1,104 @@
-# Dependency check.
-$dependencies = @('Get-ChildItem', 'Get-Date', 'Get-FileHash', 'Group-Object', 'Move-Item', 'New-Item', 'Out-GridView', 'Read-Host', 'Select-Object', 'Start-Process', 'Test-Path', 'Where-Object', 'Write-Warning')
-$missingDependencies = @()
-foreach ($dependency in $dependencies) {
+<#
+.SYNOPSIS
+Finds duplicate files by SHA-256 hash.
+
+.DESCRIPTION
+Press Enter to scan PowerShell's current folder recursively, or enter another
+folder. Select duplicates in Out-GridView to move them to Duplicates_MM_dd_yyyy
+on the Windows system drive for review.
+
+.EXAMPLE
+.\find_duplicate_files.ps1
+
+.NOTES
+Original author: Patrick Gruenauer | Microsoft MVP on PowerShell [2018-2020]
+Website: https://sid-500.com
+Edited by Paul Musselman on 4/29/2022 to use underscores in the folder date.
+#>
+
+$dependencies = @(
+    'ForEach-Object', 'Get-ChildItem', 'Get-Date', 'Get-FileHash', 'Get-Item',
+    'Get-Location', 'Group-Object', 'Join-Path', 'Move-Item', 'New-Item',
+    'Out-GridView', 'Read-Host', 'Select-Object', 'Start-Process',
+    'Where-Object', 'Write-Warning'
+)
+
+$missingDependencies = foreach ($dependency in $dependencies) {
     if (-not (Get-Command $dependency -ErrorAction SilentlyContinue)) {
-        $missingDependencies += $dependency
+        $dependency
     }
 }
-if ($missingDependencies.Count -gt 0) {
+if ($missingDependencies) {
     foreach ($dependency in $missingDependencies) {
         [Console]::Error.WriteLine("ERROR: Required command '$dependency' is unavailable.")
     }
     exit 1
 }
 
-# .SYNOPSIS
-# find_ducplicate_files.ps1 finds duplicate files based on hash values.
+$currentFolder = Get-Location
+$scanPath = Read-Host "Folder to scan (press Enter for $($currentFolder.Path))"
+if ([string]::IsNullOrWhiteSpace($scanPath)) {
+    $scanPath = '.'
+} else {
+    $scanPath = $scanPath.Trim().Trim('"')
+}
 
-# .DESCRIPTION
-# Prompts for entering file path. Shows duplicate files for selection.
-# Selected files will be moved to new folder C:\Duplicates_Date for further review.
+try {
+    $folder = Get-Item -LiteralPath $scanPath -Force -ErrorAction Stop
+} catch {
+    Write-Warning "Folder could not be opened: $scanPath. $($_.Exception.Message)"
+    return
+}
+if (-not $folder.PSIsContainer -or $folder.PSProvider.Name -ne 'FileSystem') {
+    Write-Warning "Enter a file system folder path: $scanPath"
+    return
+}
 
-# .EXAMPLE
-# Open PowerShell. Nagivate to the file location. Type .\find_duplicate_files.ps1 OR
-# Open PowerShell ISE. Open find_duplicate.ps1 and hit F5.
-
-# .NOTES
-# Author: Patrick Gruenauer | Microsoft MVP on PowerShell [2018-2020]
-# Web: https://sid-500.com
-
-# Edited by Paul Musselman on 4/29/2022
-# Modified Line 47 from MM/DD/YY to MM_dd_yyyy as "/" character is not allowed in filenames
-
-############# Find Duplicate Files based on Hash Value ###############
-''
-$filepath = Read-Host 'Enter file path for searching duplicate files (e.g. C:\Temp, C:\)'
-
-If (Test-Path $filepath) {
-    ''
-    Write-Warning 'Searching for duplicates ... Please wait ...'
-
-    $duplicates = Get-ChildItem $filepath -File -Recurse `
-        -ErrorAction SilentlyContinue |
-        Get-FileHash |
+Write-Warning "Searching for duplicates in $($folder.FullName) ..."
+$duplicates = @(
+    Get-ChildItem -LiteralPath $folder.FullName -File -Recurse -ErrorAction SilentlyContinue |
+        ForEach-Object { Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256 } |
         Group-Object -Property Hash |
         Where-Object Count -GT 1
+)
 
-    If ($duplicates.count -lt 1) {
-        Write-Warning 'No duplicates found.'
-        Break ''
-    } else {
-        Write-Warning "Duplicates found."
-        $result = foreach ($d in $duplicates) {
-            $d.Group | Select-Object -Property Path, Hash
-        }
+if ($duplicates.Count -eq 0) {
+    Write-Warning 'No duplicates found.'
+    return
+}
 
-        $date = Get-Date -Format "MM_dd_yyyy"
-        $itemstomove = $result |
-            Out-GridView -Title `
-                "Select files (CTRL for multiple) and press OK. Selected files will be moved to C:\Duplicates_$date" `
-                -PassThru
+$result = foreach ($group in $duplicates) {
+    $group.Group | Select-Object -Property Path, Hash
+}
 
-        If ($itemstomove) {
-            New-Item -ItemType Directory `
-                -Path $env:SystemDrive\Duplicates_$date -Force
-            Move-Item $itemstomove.Path `
-                -Destination $env:SystemDrive\Duplicates_$date -Force
-            ''
-            Write-Warning `
-                "Mission accomplished. Selected files moved to C:\Duplicates_$date"
+$date = Get-Date -Format 'MM_dd_yyyy'
+$destination = Join-Path -Path "$env:SystemDrive\" -ChildPath "Duplicates_$date"
+$itemsToMove = $result |
+    Out-GridView -Title "Select files to move to $destination (Ctrl-click for multiple)" -PassThru
 
-            Start-Process "C:\Duplicates_$date"
-        } else {
-            Write-Warning "Operation aborted. No files selected."
-        }
+if (-not $itemsToMove) {
+    Write-Warning 'No files selected.'
+    return
+}
+
+try {
+    $null = New-Item -ItemType Directory -Path $destination -Force -ErrorAction Stop
+} catch {
+    Write-Warning "Could not create $destination. $($_.Exception.Message)"
+    return
+}
+
+$movedCount = 0
+foreach ($item in $itemsToMove) {
+    try {
+        Move-Item -LiteralPath $item.Path -Destination $destination -ErrorAction Stop
+        $movedCount++
+    } catch {
+        Write-Warning "Could not move '$($item.Path)': $($_.Exception.Message)"
     }
-} else {
-    Write-Warning `
-        "Folder not found. Use full path to directory e.g. C:\photos\patrick"
+}
+
+if ($movedCount -gt 0) {
+    Write-Warning "Moved $movedCount file(s) to $destination."
+    Start-Process -FilePath $destination
 }
